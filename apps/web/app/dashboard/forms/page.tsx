@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { ConfirmModal } from "~/components/ui/confirm-modal";
-import { trpc } from "~/trpc/client";
-import { Plus, Search, MoreVertical, Eye, Copy, BarChart2, Trash2, FileText } from "lucide-react";
-import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { ConfirmModal } from "~/components/ui/confirm-modal";
+import { NewFormButton } from "~/components/ui/new-form-button";
+import { trpc } from "~/trpc/client";
+import { toast } from "sonner";
+import { Search, MoreVertical, Eye, Copy, BarChart2, Trash2, FileText } from "lucide-react";
 
 const STATUS_BADGE: Record<string, string> = {
   published: "badge-published",
@@ -57,10 +57,10 @@ export default function FormsPage() {
           <h1 className="font-bangers text-stroke-black text-[#1a1a1a] tracking-wide" style={{ fontSize:"clamp(2rem,4vw,3rem)" }}>ALL FORMS</h1>
           <p className="font-bold text-[#555] text-sm mt-0.5">{forms?.length ?? 0} experiments on record</p>
         </div>
-        <Link href="/dashboard/forms/new"
-          className="cartoon-btn bg-[#cc0000] text-white font-bangers text-xl px-5 py-2.5 tracking-wider flex items-center gap-2">
-          <Plus className="h-4 w-4" /> NEW FORM
-        </Link>
+        <NewFormButton
+          label="NEW FORM"
+          className="cartoon-btn bg-[#cc0000] text-white font-bangers text-xl px-5 py-2.5 tracking-wider flex items-center gap-2"
+        />
       </div>
 
       {/* Filters */}
@@ -102,9 +102,10 @@ export default function FormsPage() {
             {search ? "Try a different search term." : "Create your first form experiment!"}
           </p>
           {!search && (
-            <Link href="/dashboard/forms/new" className="cartoon-btn bg-[#cc0000] text-white font-bangers text-xl px-6 py-3 tracking-wider inline-flex items-center gap-2">
-              <Plus className="h-5 w-5" /> NEW EXPERIMENT
-            </Link>
+            <NewFormButton
+              label="NEW EXPERIMENT"
+              className="cartoon-btn bg-[#cc0000] text-white font-bangers text-xl px-6 py-3 tracking-wider inline-flex items-center gap-2"
+            />
           )}
         </div>
       ) : (

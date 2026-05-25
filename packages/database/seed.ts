@@ -11,13 +11,13 @@ import { eq, inArray } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 const DEMO_USER = {
-  email: "demo@chaiforms.dev",
+  email: "demo@dexterforms.dev",
   password: "Demo@123456",
   fullName: "Demo Creator",
 };
 
 async function seed() {
-  console.log("🌱 Seeding ChaiForms demo data...\n");
+  console.log("🌱 Seeding DexterForms demo data...\n");
 
   // ─── Demo User ──────────────────────────────────────────────────────────────
   const passwordHash = await bcrypt.hash(DEMO_USER.password, 12);
@@ -398,7 +398,7 @@ async function seed() {
       {
         formId: form3!.id,
         type: "checkbox",
-        label: "I agree to be featured in the ChaiForms weekly newsletter",
+        label: "I agree to be featured in the DexterForms weekly newsletter",
         required: false,
         order: 9,
       },

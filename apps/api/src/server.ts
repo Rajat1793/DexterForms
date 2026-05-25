@@ -68,10 +68,10 @@ const authLimiter = rateLimit({
 app.use(generalLimiter);
 
 const openApiDocument = generateOpenApiDocument(serverRouter, {
-  title: "ChaiForms API",
+  title: "DexterForms API",
   version: "1.0.0",
   description:
-    "ChaiForms — Form Builder SaaS API. Build dynamic forms, collect responses, and analyze data.",
+    "DexterForms — Form Builder SaaS API. Build dynamic forms, collect responses, and analyze data.",
   baseUrl: env.BASE_URL.concat("/api"),
   tags: [
     { name: "Authentication", description: "User registration, login and auth" },
@@ -85,14 +85,14 @@ const openApiDocument = generateOpenApiDocument(serverRouter, {
 
 app.get("/", (_req, res) => {
   return res.json({
-    message: "ChaiForms API is running 🍵",
+    message: "DexterForms API is running 🍵",
     docs: `${env.BASE_URL}/docs`,
     version: "1.0.0",
   });
 });
 
 app.get("/health", (_req, res) => {
-  return res.json({ message: "ChaiForms API is healthy", healthy: true });
+  return res.json({ message: "DexterForms API is healthy", healthy: true });
 });
 
 logger.debug(`OpenAPI JSON: ${env.BASE_URL}/openapi.json`);

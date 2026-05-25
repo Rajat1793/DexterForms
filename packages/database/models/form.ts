@@ -48,6 +48,8 @@ export const formsTable = pgTable("forms", {
 
   responseCount: integer("response_count").default(0),
 
+  notifyOnResponse: boolean("notify_on_response").default(false),
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });

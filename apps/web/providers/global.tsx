@@ -30,7 +30,7 @@ export const GlobalProviders: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     console.log(
-      "%c🍵 ChaiForms",
+      "%c🍵 DexterForms",
       "font-size:28px;font-weight:900;color:#cc0000;font-family:Impact,sans-serif;letter-spacing:2px;"
     );
     console.log(

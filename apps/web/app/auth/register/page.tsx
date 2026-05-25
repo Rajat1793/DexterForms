@@ -26,7 +26,7 @@ export default function RegisterPage() {
   const { register, handleSubmit, formState: { errors } } = useForm<FormData>({ resolver: zodResolver(schema) });
 
   const registerMutation = trpc.auth.register.useMutation({
-    onSuccess: (data) => { login(data.token, data.user); toast.success("Welcome to ChaiForms! 🍵"); router.push("/dashboard"); },
+    onSuccess: (data) => { login(data.token, data.user); toast.success("Welcome to DexterForms! 🍵"); router.push("/dashboard"); },
     onError: (error) => toast.error(error.message),
   });
 

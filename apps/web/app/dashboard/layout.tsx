@@ -5,13 +5,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "~/providers/auth";
-import { LayoutDashboard, FileText, LogOut, Plus, ChevronDown } from "lucide-react";
+import { LayoutDashboard, FileText, LogOut, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { RandomMascot } from "~/components/ui/mascot-stickers";
+import { NewFormButton } from "~/components/ui/new-form-button";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -56,21 +57,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Logo */}
         <div className="px-5 py-4" style={{ borderBottom:"3px solid #000" }}>
           <Link href="/" className="block">
-            <Image src="/dexterlogo.png" alt="ChaiForms" height={36} width={140} className="object-contain" style={{ height: "auto" }} />
+            <Image src="/dexterlogo.png" alt="DexterForms" height={36} width={140} className="object-contain" style={{ height: "auto" }} />
           </Link>
-          <div className="mt-2 flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-[#00a86b] animate-pulse" style={{ border:"1px solid #000" }} />
-            <span className="text-xs font-bold text-[#00a86b] tracking-wider uppercase">LAB ONLINE</span>
-          </div>
+
         </div>
 
         {/* New form CTA */}
         <div className="px-4 pt-4 pb-2">
-          <Link href="/dashboard/forms/new"
-            className="cartoon-btn bg-[#cc0000] text-white font-bangers text-xl px-4 py-2.5 tracking-wider flex items-center justify-center gap-2 w-full">
-            <Plus className="h-5 w-5" />
-            NEW FORM!
-          </Link>
+          <NewFormButton />
         </div>
 
         {/* Nav */}

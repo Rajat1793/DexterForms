@@ -4,9 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ConfirmModal } from "~/components/ui/confirm-modal";
+import { NewFormButton } from "~/components/ui/new-form-button";
 import { trpc } from "~/trpc/client";
 import { useAuth } from "~/providers/auth";
-import { Plus, FileText, Users, Globe, Copy, Trash2, MoreHorizontal, ExternalLink } from "lucide-react";
+import { FileText, Users, Globe, Copy, Trash2, MoreHorizontal, ExternalLink } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -57,10 +58,10 @@ export default function DashboardPage() {
           </h1>
           <p className="font-bold text-[#555] text-sm mt-1">MANAGE EXPERIMENTS & TRACK DATA COLLECTION</p>
         </div>
-        <Link href="/dashboard/forms/new"
-          className="cartoon-btn bg-[#cc0000] text-white font-bangers text-xl px-5 py-2.5 tracking-wider flex items-center gap-2">
-          <Plus className="h-5 w-5" /> NEW EXPERIMENT
-        </Link>
+        <NewFormButton
+          label="NEW EXPERIMENT"
+          className="cartoon-btn bg-[#cc0000] text-white font-bangers text-xl px-5 py-2.5 tracking-wider flex items-center gap-2"
+        />
       </div>
 
       {/* STATS */}
@@ -106,7 +107,7 @@ export default function DashboardPage() {
             <h3 className="font-bangers text-2xl text-[#1a1a1a] tracking-wide mb-2">NO EXPERIMENTS YET!</h3>
             <p className="text-[#555] font-bold mb-6">Your laboratory is empty. Time to create your first experiment!</p>
             <Link href="/dashboard/forms/new" className="cartoon-btn bg-[#cc0000] text-white font-bangers text-xl px-6 py-3 tracking-wider inline-flex items-center gap-2">
-              <Plus className="h-5 w-5" /> CREATE FIRST FORM
+              CREATE FIRST FORM
             </Link>
           </div>
         ) : (

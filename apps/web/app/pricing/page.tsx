@@ -51,7 +51,7 @@ const PLANS = [
     description: "For large teams with advanced needs.",
     color: "bg-[#00a86b]", textColor: "text-[#00a86b]",
     buttonClass: "cartoon-btn bg-[#00a86b] text-white font-bangers text-xl px-6 py-3 tracking-wider w-full",
-    buttonText: "CONTACT SALES", href: "mailto:hello@chaiforms.dev", popular: false,
+    buttonText: "CONTACT SALES", href: "mailto:hello@dexterforms.dev", popular: false,
     tag: "TIER-03", tagColor: "bg-[#e8f5e9] text-[#00a86b]",
     features: [
       { text: "Unlimited everything", ok: true },
@@ -83,7 +83,7 @@ export default function PricingPage() {
     if (!user) return;
     if (planName === currentPlan) return;
     if (planName === "ENTERPRISE") {
-      window.location.href = "mailto:hello@chaiforms.dev";
+      window.location.href = "mailto:hello@dexterforms.dev";
       return;
     }
     updatePlanMutation.mutate({ plan: planName as "FREE" | "PRO" | "ENTERPRISE" });
@@ -97,7 +97,7 @@ export default function PricingPage() {
       <nav className="bg-white sticky top-0 z-50" style={{ borderBottom:"4px solid #000", boxShadow:"0 4px 0 #000" }}>
         <div className="mx-auto max-w-7xl flex items-center justify-between px-6 py-3">
           <Link href="/">
-            <Image src="/dexterlogo.png" alt="ChaiForms" height={40} width={160} style={{ height:"auto" }} className="object-contain" priority />
+            <Image src="/dexterlogo.png" alt="DexterForms" height={40} width={160} style={{ height:"auto" }} className="object-contain" priority />
           </Link>
           <div className="flex items-center gap-3">
             {user ? (
@@ -190,7 +190,7 @@ export default function PricingPage() {
                     {buttonLabel}
                   </button>
                 ) : (
-                  <Link href={plan.name === "ENTERPRISE" ? "mailto:hello@chaiforms.dev" : plan.href} className={plan.buttonClass}>
+                  <Link href={plan.name === "ENTERPRISE" ? "mailto:hello@dexterforms.dev" : plan.href} className={plan.buttonClass}>
                     {plan.buttonText}
                   </Link>
                 )}
@@ -234,7 +234,7 @@ export default function PricingPage() {
         <p className="text-[#888] text-xs">
           <Link href="/" className="hover:text-white transition-colors">← Back to Lab</Link>
           <span className="mx-3">·</span>
-          Questions? hello@chaiforms.dev
+          Questions? hello@dexterforms.dev
         </p>
       </footer>
     </div>

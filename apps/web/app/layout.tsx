@@ -27,11 +27,11 @@ const comicNeue = Comic_Neue({
 
 export const metadata: Metadata = {
   title: {
-    default: "ChaiForms — Beautiful Form Builder",
-    template: "%s | ChaiForms",
+    default: "DexterForms — Beautiful Form Builder",
+    template: "%s | DexterForms",
   },
   description:
-    "Create beautiful, dynamic forms and collect responses with ease. ChaiForms is the modern form builder for creators and teams.",
+    "Create beautiful, dynamic forms and collect responses with ease. DexterForms is the modern form builder for creators and teams.",
   keywords: ["form builder", "surveys", "typeform alternative", "form creator"],
 };
 

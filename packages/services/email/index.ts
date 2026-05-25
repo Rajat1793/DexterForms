@@ -47,7 +47,48 @@ export async function sendNewResponseNotification(opts: {
           margin-top: 16px;
         ">View Response</a>
         <p style="color: #6b7280; font-size: 14px; margin-top: 24px;">
-          This email was sent by ChaiForms.
+          This email was sent by DexterForms.
+        </p>
+      </div>
+    `,
+  });
+}
+
+export async function sendPasswordResetEmail(opts: {
+  email: string;
+  fullName: string;
+  token: string;
+}) {
+  if (!transporter) return;
+
+  const resetUrl = `${env.FRONTEND_URL}/auth/reset-password?token=${opts.token}`;
+
+  await transporter.sendMail({
+    from: env.SMTP_FROM,
+    to: opts.email,
+    subject: "Reset your DexterForms password",
+    html: `
+      <div style="font-family: Inter, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #fffde7; border: 3px solid #000;">
+        <h2 style="font-family: Bangers, sans-serif; color: #cc0000; font-size: 28px; letter-spacing: 2px;">🔑 RESET YOUR PASSWORD</h2>
+        <p>Hey ${opts.fullName},</p>
+        <p>Someone requested a password reset for your DexterForms account. If this wasn't you, you can safely ignore this email.</p>
+        <p>This link expires in <strong>1 hour</strong>.</p>
+        <a href="${resetUrl}" style="
+          display: inline-block;
+          padding: 12px 24px;
+          background: #cc0000;
+          color: white;
+          text-decoration: none;
+          font-weight: 800;
+          border: 3px solid #000;
+          box-shadow: 4px 4px 0 #000;
+          margin-top: 16px;
+          font-family: monospace;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+        ">RESET PASSWORD</a>
+        <p style="color: #6b7280; font-size: 12px; margin-top: 24px; font-family: monospace;">
+          DexterForms · If you did not request this, no action is required.
         </p>
       </div>
     `,
@@ -70,7 +111,7 @@ export async function sendResponseConfirmation(opts: {
         <h2 style="color: #6366f1;">Response Received ✅</h2>
         <p>${opts.successMessage ?? "Thank you for your response!"}</p>
         <p style="color: #6b7280; font-size: 14px; margin-top: 24px;">
-          This confirmation was sent by ChaiForms.
+          This confirmation was sent by DexterForms.
         </p>
       </div>
     `,

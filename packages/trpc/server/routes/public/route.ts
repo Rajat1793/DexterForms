@@ -1,8 +1,9 @@
 import { z, zodUndefinedModel } from "../../schema";
-import { formService, responseService } from "../../services";
+import { formService, responseService, userService } from "../../services";
 import { publicProcedure, router } from "../../trpc";
 import { generatePath } from "../../utils/path-generator";
 import { TRPCError } from "@trpc/server";
+import { sendNewResponseNotification } from "@repo/services/email";
 
 const TAGS = ["Public"];
 const getPath = generatePath("/public");
@@ -160,6 +161,19 @@ export const publicRouter = router({
         ipAddress,
         userAgent: ctx.req.headers["user-agent"],
       });
+
+      // Send email notification to form creator if enabled
+      if (form.notifyOnResponse) {
+        const creator = await userService.getUserById(form.creatorId);
+        if (creator) {
+          sendNewResponseNotification({
+            creatorEmail: creator.email,
+            formTitle: form.title,
+            formId: form.id,
+            responseId: response.id,
+          }).catch(() => {}); // fire-and-forget, don't fail submission
+        }
+      }
 
       return { responseId: response.id, success: true };
     }),

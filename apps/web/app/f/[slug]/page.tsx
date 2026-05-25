@@ -42,10 +42,28 @@ function FieldInput({
   switch (field.type) {
     case "short_text":
     case "url":
-    case "phone":
-      return <input type={field.type === "url" ? "url" : field.type === "phone" ? "tel" : "text"}
+      return <input type={field.type === "url" ? "url" : "text"}
         value={value} onChange={(e) => onChange(e.target.value)}
         className={baseClass} style={inputStyle} placeholder={field.placeholder ?? ""} />;
+
+    case "phone":
+      return (
+        <div>
+          <input
+            type="tel"
+            value={value}
+            onChange={(e) => {
+              // Only allow digits, spaces, +, -, (, )
+              const cleaned = e.target.value.replace(/[^\d\s+\-()]/g, "");
+              onChange(cleaned);
+            }}
+            maxLength={15}
+            className={baseClass} style={inputStyle}
+            placeholder={field.placeholder ?? "10-digit number"}
+          />
+          <p className="text-xs text-[#888] mt-1 font-mono">Digits only · 10 digits required</p>
+        </div>
+      );
 
     case "email":
       return <input type="email" value={value} onChange={(e) => onChange(e.target.value)}
@@ -194,15 +212,41 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
   const validate = () => {
     const newErrors: Record<string, string> = {};
     for (const field of form?.fields ?? []) {
+      const val = answers[field.id];
+
       if (field.required) {
-        const val = answers[field.id];
         if (!val || val.trim() === "" || val === "[]" || val === "false") {
           newErrors[field.id] = "This field is required ⚠";
+          continue;
         }
       }
-      if (field.type === "email" && answers[field.id]) {
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(answers[field.id]!)) {
+
+      if (!val || val.trim() === "") continue;
+
+      if (field.type === "email") {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) {
           newErrors[field.id] = "Please enter a valid email address";
+        }
+      }
+
+      if (field.type === "phone") {
+        const digits = val.replace(/\D/g, "");
+        if (digits.length !== 10) {
+          newErrors[field.id] = "Phone number must be exactly 10 digits";
+        }
+      }
+
+      if (field.type === "url") {
+        try {
+          new URL(val.startsWith("http") ? val : `https://${val}`);
+        } catch {
+          newErrors[field.id] = "Please enter a valid URL";
+        }
+      }
+
+      if (field.type === "number") {
+        if (isNaN(Number(val))) {
+          newErrors[field.id] = "Please enter a valid number";
         }
       }
     }
@@ -217,12 +261,21 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
       return;
     }
     const completionTime = Math.round((Date.now() - startTimeRef.current) / 1000);
+
+    // Auto-populate respondent info from submitted field values
+    const emailField = form?.fields.find((f) => f.type === "email");
+    const nameField = form?.fields.find(
+      (f) => f.type === "short_text" && /name/i.test(f.label)
+    );
+
     submitMutation.mutate({
       formId: form!.id,
       answers: Object.entries(answers)
         .filter(([, v]) => v !== undefined && v !== "")
         .map(([fieldId, value]) => ({ fieldId, value })),
       completionTime,
+      respondentEmail: emailField ? answers[emailField.id] : undefined,
+      respondentName: nameField ? answers[nameField.id] : undefined,
     });
   };
 
@@ -350,7 +403,7 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
         {/* Footer */}
         <p className="text-center text-xs font-bold text-[#888] mt-8">
           Powered by{" "}
-          <a href="/" className="text-[#cc0000] hover:underline font-black">🍵 ChaiForms</a>
+          <a href="/" className="text-[#cc0000] hover:underline font-black">🍵 DexterForms</a>
         </p>
       </div>
 

@@ -36,7 +36,7 @@ const TEMPLATE_FIELDS: Record<string, FieldDef[]> = {
     { type: "long_text",  label: "Message", placeholder: "Tell us how we can help...", required: true },
   ],
   "Customer Feedback": [
-    { type: "short_text",    label: "Product / Service Name", placeholder: "e.g. ChaiForms Pro", required: true },
+    { type: "short_text",    label: "Product / Service Name", placeholder: "e.g. DexterForms Pro", required: true },
     { type: "rating",        label: "Overall Experience", required: true, settings: { maxRating: 5 } },
     { type: "long_text",     label: "What did you like most?", placeholder: "Share the highlights..." },
     { type: "long_text",     label: "What could be improved?", placeholder: "We appreciate honest feedback!" },

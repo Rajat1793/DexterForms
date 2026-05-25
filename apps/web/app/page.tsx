@@ -95,7 +95,7 @@ export default function LandingPage() {
       {/* NAV */}
       <nav className="bg-white sticky top-0 z-50" style={{ borderBottom:"4px solid #000", boxShadow:"0 4px 0 #000" }}>
         <div className="mx-auto max-w-7xl flex items-center justify-between px-6 py-3">
-          <Link href="/"><Image src="/dexterlogo.png" alt="ChaiForms" height={40} width={160} style={{ height: "auto" }} className="object-contain" priority /></Link>
+          <Link href="/"><Image src="/dexterlogo.png" alt="DexterForms" height={40} width={160} style={{ height: "auto" }} className="object-contain" priority /></Link>
           <div className="hidden md:flex items-center gap-6">
             <Link href="/pricing" className="font-bold text-[#1a1a1a] hover:text-[#cc0000] uppercase text-sm tracking-wide">Pricing</Link>
             <Link href="http://localhost:8000/docs" target="_blank" className="font-bold text-[#1a1a1a] hover:text-[#cc0000] uppercase text-sm tracking-wide">API Docs</Link>
@@ -269,7 +269,7 @@ export default function LandingPage() {
         <div className="checker-strip -mt-10 mb-10" />
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <Image src="/dexterlogo.png" alt="ChaiForms" height={32} width={120} style={{ height: "auto" }} className="object-contain opacity-80" />
+            <Image src="/dexterlogo.png" alt="DexterForms" height={32} width={120} style={{ height: "auto" }} className="object-contain opacity-80" />
             <p className="text-[#888] text-xs mt-1">&quot;OMELETTE DU FROMAGE&quot; — Dexter, S1E17</p>
           </div>
           <div className="flex items-center gap-6 text-xs text-[#888]">

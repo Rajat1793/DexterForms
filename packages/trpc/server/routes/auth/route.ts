@@ -119,4 +119,32 @@ export const authRouter = router({
       const user = await userService.updatePlan(ctx.user.userId, input.plan);
       return { plan: user.plan ?? "FREE" };
     }),
+
+  requestPasswordReset: publicProcedure
+    .meta({
+      openapi: { method: "POST", path: getPath("/forgot-password"), tags: TAGS },
+    })
+    .input(z.object({ email: z.string().email() }))
+    .output(z.object({ success: z.boolean() }))
+    .mutation(async ({ input }) => {
+      await userService.requestPasswordReset(input.email);
+      // Always return success to avoid email enumeration
+      return { success: true };
+    }),
+
+  resetPassword: publicProcedure
+    .meta({
+      openapi: { method: "POST", path: getPath("/reset-password"), tags: TAGS },
+    })
+    .input(
+      z.object({
+        token: z.string().min(1),
+        newPassword: z.string().min(8),
+      })
+    )
+    .output(z.object({ success: z.boolean() }))
+    .mutation(async ({ input }) => {
+      await userService.resetPassword(input.token, input.newPassword);
+      return { success: true };
+    }),
 });

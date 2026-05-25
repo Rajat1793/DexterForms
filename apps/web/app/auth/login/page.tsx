@@ -43,7 +43,7 @@ export default function LoginPage() {
         {/* Demo creds */}
         <div className="mb-6 p-4 bg-[#fff9c4]" style={{ border:"2px solid #000", boxShadow:"3px 3px 0 #000", transform:"rotate(-0.5deg)" }}>
           <p className="font-bangers text-sm text-[#cc0000] tracking-wider mb-1">🔑 DEMO ACCESS CODES</p>
-          <p className="text-xs font-bold text-[#1a1a1a]">EMAIL: <span className="font-mono text-[#1565c0]">demo@chaiforms.dev</span></p>
+          <p className="text-xs font-bold text-[#1a1a1a]">EMAIL: <span className="font-mono text-[#1565c0]">demo@dexterforms.dev</span></p>
           <p className="text-xs font-bold text-[#1a1a1a]">PASS: <span className="font-mono text-[#cc0000]">Demo@123456</span></p>
         </div>
 
@@ -78,7 +78,13 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm font-bold text-[#555]">
+        <p className="mt-4 text-center text-xs font-bold text-[#888]">
+          <Link href="/auth/forgot-password" className="text-[#1565c0] hover:text-[#cc0000] underline">
+            Forgot password?
+          </Link>
+        </p>
+
+        <p className="mt-4 text-center text-sm font-bold text-[#555]">
           New scientist?{" "}
           <Link href="/auth/register" className="text-[#1565c0] hover:text-[#cc0000] font-bold underline">
             Register here →

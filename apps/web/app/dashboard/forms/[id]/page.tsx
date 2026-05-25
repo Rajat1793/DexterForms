@@ -42,6 +42,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { MascotStickers } from "~/components/ui/mascot-stickers";
 
 const FIELD_TYPES = [
   { type: "short_text", label: "Short Text", emoji: "📝", description: "Single line text" },
@@ -85,11 +86,13 @@ function SortableField({
   isSelected,
   onSelect,
   onDelete,
+  onDuplicate,
 }: {
   field: Field;
   isSelected: boolean;
   onSelect: () => void;
   onDelete: () => void;
+  onDuplicate: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: field.id });
@@ -131,15 +134,28 @@ function SortableField({
         </div>
         <div className="text-xs text-[#888] mt-0.5 uppercase tracking-wider font-bold">{fieldDef?.label}</div>
       </div>
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onDelete();
-        }}
-        className="opacity-0 group-hover:opacity-100 text-[#888] hover:text-[#cc0000] transition-all"
-      >
-        <Trash2 className="h-4 w-4" />
-      </button>
+      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDuplicate();
+          }}
+          className="text-[#888] hover:text-[#1565c0] transition-colors"
+          title="Duplicate field"
+        >
+          <Copy className="h-3.5 w-3.5" />
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete();
+          }}
+          className="text-[#888] hover:text-[#cc0000] transition-colors"
+          title="Delete field"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      </div>
     </div>
   );
 }
@@ -362,6 +378,22 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
     updateFieldMutation.mutate({ formId, fieldId, ...data } as any);
   };
 
+  const handleDuplicateField = (field: Field) => {
+    const count = (fields as Field[]).length;
+    addFieldMutation.mutate({
+      formId,
+      type: field.type as any,
+      label: `${field.label} (copy)`,
+      placeholder: field.placeholder ?? undefined,
+      description: field.description ?? undefined,
+      required: field.required ?? false,
+      order: count,
+      page: field.page ?? 1,
+      options: field.options ?? undefined,
+      settings: field.settings ?? undefined,
+    });
+  };
+
   if (formLoading || fieldsLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#fffde7]">
@@ -385,7 +417,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
   const isPublished = form.status === "published";
 
   return (
-    <div className="h-screen flex flex-col bg-[#fffde7] overflow-hidden">
+    <div className="h-screen flex flex-col bg-polka-yellow overflow-hidden">
       {/* Top bar */}
       <div className="bg-white px-6 py-3 flex items-center gap-4 flex-shrink-0"
         style={{ borderBottom:"4px solid #000", boxShadow:"0 4px 0 #000" }}>
@@ -516,6 +548,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
                           isSelected={selectedFieldId === field.id}
                           onSelect={() => setSelectedFieldId(field.id)}
                           onDelete={() => setPendingDeleteFieldId(field.id)}
+                          onDuplicate={() => handleDuplicateField(field)}
                         />
                       ))}
                     </div>
@@ -608,6 +641,18 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
                     <span className={`absolute top-0.5 h-4 w-4 bg-white shadow transition-transform ${form.showProgressBar ? "translate-x-4" : "translate-x-0.5"}`} />
                   </button>
                 </div>
+                <div className="flex items-center justify-between border border-[#ddd] px-3 py-2.5">
+                  <div>
+                    <span className="text-xs text-[#555] font-mono uppercase tracking-wider">Email on new response</span>
+                    <p className="text-xs text-[#888] font-mono mt-0.5">Get notified when someone submits</p>
+                  </div>
+                  <button
+                    onClick={() => updateFormMutation.mutate({ id: formId, notifyOnResponse: !(form as any).notifyOnResponse })}
+                    className={`relative h-5 w-9 transition-colors flex-shrink-0 ${(form as any).notifyOnResponse ? "bg-[#00a86b]" : "bg-[#e0e0e0]"}`}
+                  >
+                    <span className={`absolute top-0.5 h-4 w-4 bg-white shadow transition-transform ${(form as any).notifyOnResponse ? "translate-x-4" : "translate-x-0.5"}`} />
+                  </button>
+                </div>
                 {isPublished && form.slug && (
                   <div className="p-4" style={{ border:"2px solid #00a86b", background:"#e8f5e9" }}>
                     <p className="text-xs font-bangers text-[#00a86b] mb-2 tracking-widest">● PUBLISHED!</p>
@@ -653,7 +698,8 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
         </div>
 
         {/* Center: form preview */}
-        <div className="flex-1 bg-[#fffde7] overflow-y-auto">
+        <div className="relative flex-1 bg-polka-yellow overflow-y-auto">
+          <MascotStickers count={2} />
           <div className="max-w-2xl mx-auto p-8 font-mono">
             <div className="border border-[#ccc] bg-white overflow-hidden">
               <div className="bg-[#cc0000] border-b border-[#aa0000] p-6">

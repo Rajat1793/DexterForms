@@ -26,6 +26,7 @@ const formOutputSchema = z.object({
   isMultiPage: z.boolean().nullable(),
   totalPages: z.number().nullable(),
   responseCount: z.number().nullable(),
+  notifyOnResponse: z.boolean().nullable(),
   createdAt: z.date().nullable(),
   updatedAt: z.date().nullable(),
 });
@@ -77,6 +78,7 @@ export const formsRouter = router({
         successMessage: z.string().optional(),
         redirectUrl: z.string().nullable().optional(),
         showProgressBar: z.boolean().optional(),
+        notifyOnResponse: z.boolean().optional(),
       })
     )
     .output(formOutputSchema)
