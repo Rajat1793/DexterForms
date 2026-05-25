@@ -1,0 +1,1 @@
+ALTER TABLE "users" ADD COLUMN "plan" varchar(20) DEFAULT 'FREE' NOT NULL;

@@ -11,6 +11,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { RandomMascot } from "~/components/ui/mascot-stickers";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -55,7 +56,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Logo */}
         <div className="px-5 py-4" style={{ borderBottom:"3px solid #000" }}>
           <Link href="/" className="block">
-            <Image src="/dexterlogo.png" alt="ChaiForms" height={36} width={140} className="object-contain" />
+            <Image src="/dexterlogo.png" alt="ChaiForms" height={36} width={140} className="object-contain" style={{ height: "auto" }} />
           </Link>
           <div className="mt-2 flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-[#00a86b] animate-pulse" style={{ border:"1px solid #000" }} />
@@ -120,7 +121,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Mascot */}
         <div className="px-4 pb-2 flex justify-center opacity-70">
-          <Image src="/dexter-lab.jpeg" alt="Dexter" width={110} height={110} className="object-contain" />
+          <RandomMascot width={110} height={110} />
         </div>
       </aside>
 

@@ -40,6 +40,7 @@ export const authRouter = router({
           id: z.string(),
           fullName: z.string(),
           email: z.string(),
+          plan: z.string(),
         }),
       })
     )
@@ -47,7 +48,7 @@ export const authRouter = router({
       const { user, token } = await userService.register(input);
       return {
         token,
-        user: { id: user.id, fullName: user.fullName, email: user.email },
+        user: { id: user.id, fullName: user.fullName, email: user.email, plan: user.plan ?? "FREE" },
       };
     }),
 
@@ -68,6 +69,7 @@ export const authRouter = router({
           id: z.string(),
           fullName: z.string(),
           email: z.string(),
+          plan: z.string(),
         }),
       })
     )
@@ -75,7 +77,7 @@ export const authRouter = router({
       const { user, token } = await userService.login(input);
       return {
         token,
-        user: { id: user.id, fullName: user.fullName, email: user.email },
+        user: { id: user.id, fullName: user.fullName, email: user.email, plan: user.plan ?? "FREE" },
       };
     }),
 
@@ -89,6 +91,7 @@ export const authRouter = router({
         id: z.string(),
         fullName: z.string(),
         email: z.string(),
+        plan: z.string(),
         profileImageUrl: z.string().nullable(),
         createdAt: z.date().nullable(),
       })
@@ -100,8 +103,20 @@ export const authRouter = router({
         id: user.id,
         fullName: user.fullName,
         email: user.email,
+        plan: user.plan ?? "FREE",
         profileImageUrl: user.profileImageUrl ?? null,
         createdAt: user.createdAt ?? null,
       };
+    }),
+
+  updatePlan: protectedProcedure
+    .meta({
+      openapi: { method: "PATCH", path: getPath("/plan"), tags: TAGS },
+    })
+    .input(z.object({ plan: z.enum(["FREE", "PRO", "ENTERPRISE"]) }))
+    .output(z.object({ plan: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const user = await userService.updatePlan(ctx.user.userId, input.plan);
+      return { plan: user.plan ?? "FREE" };
     }),
 });

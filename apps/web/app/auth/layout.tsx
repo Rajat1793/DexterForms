@@ -8,7 +8,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       {/* Top nav */}
       <div className="bg-white px-6 py-3" style={{ borderBottom:"4px solid #000", boxShadow:"0 4px 0 #000" }}>
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/dexterlogo.png" alt="ChaiForms" height={34} width={130} className="object-contain" priority />
+          <Image src="/dexterlogo.png" alt="ChaiForms" height={34} width={130} style={{ height: "auto" }} className="object-contain" priority />
         </Link>
       </div>
       <div className="flex flex-1 items-center justify-center px-4 py-12">

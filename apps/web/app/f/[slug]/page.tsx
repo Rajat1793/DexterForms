@@ -2,15 +2,10 @@
 
 import { use, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { trpc } from "~/trpc/client";
 import { toast } from "sonner";
 import { Loader2, Star, Check, AlertCircle } from "lucide-react";
-
-const MASCOT_IMAGES = [
-  "/dexter1.png", "/dexter2.png", "/dee-dee.jpg", "/dexter-flask.jpg",
-  "/dexter-pose.png", "/dexter-deedee.png", "/dexter-face.jpeg", "/dexter-lab.jpeg",
-];
+import { MascotStickers, RandomMascot } from "~/components/ui/mascot-stickers";
 
 type FormField = {
   id: string; type: string; label: string; placeholder: string | null;
@@ -179,7 +174,6 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
   const startTimeRef = useRef(Date.now());
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [mascot] = useState<string>(() => MASCOT_IMAGES[Math.floor(Math.random() * MASCOT_IMAGES.length)]!);
 
   const { data: form, isLoading, error } = trpc.public.getFormBySlug.useQuery({ slug });
 
@@ -263,7 +257,8 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
   const progressPercent = totalFields > 0 ? Math.round((answeredFields / totalFields) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-polka-yellow py-10 px-4">
+    <div className="relative min-h-screen bg-polka-yellow py-10 px-4 overflow-x-hidden">
+      <MascotStickers count={3} />
       <div className="checker-strip fixed top-0 left-0 right-0 z-10" />
 
       <div className="max-w-2xl mx-auto pt-6 pb-16">
@@ -280,7 +275,7 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
               )}
             </div>
             <div className="absolute -bottom-2 right-4 pointer-events-none">
-              <Image src={mascot} alt="" width={100} height={100} className="object-contain drop-shadow-lg" />
+              <RandomMascot width={100} height={100} className="drop-shadow-lg" />
             </div>
           </div>
           {/* Progress bar */}

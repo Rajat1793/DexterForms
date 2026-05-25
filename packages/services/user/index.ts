@@ -76,6 +76,16 @@ class UserService {
     return user ?? null;
   }
 
+  public async updatePlan(userId: string, plan: string) {
+    const [user] = await db
+      .update(usersTable)
+      .set({ plan, updatedAt: new Date() })
+      .where(eq(usersTable.id, userId))
+      .returning();
+    if (!user) throw new Error("User not found");
+    return user;
+  }
+
   public async getAuthenticationMethods(): Promise<
     ReadonlyArray<GetAuthenticationMethodOutputSchema>
   > {

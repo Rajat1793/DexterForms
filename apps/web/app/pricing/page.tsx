@@ -1,8 +1,11 @@
-import Link from "next/link";
-import { CheckCircle, X } from "lucide-react";
-import type { Metadata } from "next";
+"use client";
 
-export const metadata: Metadata = { title: "Pricing" };
+import Link from "next/link";
+import Image from "next/image";
+import { CheckCircle, X, BadgeCheck, Loader2 } from "lucide-react";
+import { useAuth } from "~/providers/auth";
+import { trpc } from "~/trpc/client";
+import { toast } from "sonner";
 
 const PLANS = [
   {
@@ -65,6 +68,27 @@ const PLANS = [
 ];
 
 export default function PricingPage() {
+  const { user, updateUser } = useAuth();
+  const currentPlan = user?.plan ?? null;
+
+  const updatePlanMutation = trpc.auth.updatePlan.useMutation({
+    onSuccess: (data) => {
+      updateUser({ plan: data.plan });
+      toast.success(`Plan updated to ${data.plan}! 🧪`);
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  function handlePlanClick(planName: string) {
+    if (!user) return;
+    if (planName === currentPlan) return;
+    if (planName === "ENTERPRISE") {
+      window.location.href = "mailto:hello@chaiforms.dev";
+      return;
+    }
+    updatePlanMutation.mutate({ plan: planName as "FREE" | "PRO" | "ENTERPRISE" });
+  }
+
   return (
     <div className="min-h-screen bg-[#fffde7]">
       <div className="checker-strip" />
@@ -72,12 +96,25 @@ export default function PricingPage() {
       {/* NAV */}
       <nav className="bg-white sticky top-0 z-50" style={{ borderBottom:"4px solid #000", boxShadow:"0 4px 0 #000" }}>
         <div className="mx-auto max-w-7xl flex items-center justify-between px-6 py-3">
-          <Link href="/" className="font-bangers text-2xl text-[#cc0000] tracking-widest" style={{ WebkitTextStroke:"1px #000" }}>
-            🧪 CHAIFORMS
+          <Link href="/">
+            <Image src="/dexterlogo.png" alt="ChaiForms" height={40} width={160} style={{ height:"auto" }} className="object-contain" priority />
           </Link>
           <div className="flex items-center gap-3">
-            <Link href="/auth/login" className="font-bold text-[#1a1a1a] hover:text-[#cc0000] uppercase text-sm tracking-wide">Sign In</Link>
-            <Link href="/auth/register" className="cartoon-btn bg-[#cc0000] text-white font-bangers text-xl px-5 py-2 tracking-wider">GET STARTED</Link>
+            {user ? (
+              <>
+                <span className="text-sm font-bold text-[#555] hidden md:inline">
+                  Hi, {user.fullName.split(" ")[0]}! 👋
+                </span>
+                <Link href="/dashboard" className="cartoon-btn bg-[#cc0000] text-white font-bangers text-xl px-5 py-2 tracking-wider">
+                  ENTER LAB →
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link href="/auth/login" className="font-bold text-[#1a1a1a] hover:text-[#cc0000] uppercase text-sm tracking-wide">Sign In</Link>
+                <Link href="/auth/register" className="cartoon-btn bg-[#cc0000] text-white font-bangers text-xl px-5 py-2 tracking-wider">GET STARTED</Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -98,10 +135,30 @@ export default function PricingPage() {
       {/* PLANS */}
       <div className="bg-white py-20 px-6" style={{ borderBottom:"4px solid #000" }}>
         <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
-          {PLANS.map((plan) => (
-            <div key={plan.name} className="cartoon-card bg-white relative"
-              style={{ transform:`rotate(${plan.rotate})` }}>
-              {plan.popular && (
+          {PLANS.map((plan) => {
+            const isCurrent = plan.name === currentPlan;
+            const isPending = updatePlanMutation.isPending && updatePlanMutation.variables?.plan === plan.name;
+            const buttonLabel = isCurrent
+              ? "✓ CURRENT PLAN"
+              : isPending
+              ? "UPDATING..."
+              : plan.buttonText;
+            const buttonClass = isCurrent
+              ? `cartoon-btn bg-[#00a86b] text-white font-bangers text-xl px-6 py-3 tracking-wider w-full opacity-90 cursor-default`
+              : plan.buttonClass;
+
+            return (
+            <div key={plan.name} className={`cartoon-card bg-white relative ${isCurrent ? "ring-4 ring-[#00a86b]" : ""}`}
+              style={{ transform:`rotate(${plan.rotate})`, boxShadow: isCurrent ? "6px 6px 0 #00a86b" : undefined }}>
+              {isCurrent && (
+                <div className="absolute -top-5 left-1/2 -translate-x-1/2 z-10 whitespace-nowrap"
+                  style={{ background:"#00a86b", border:"3px solid #000", boxShadow:"3px 3px 0 #000",
+                    padding:"4px 14px", fontFamily:"var(--font-bangers)", letterSpacing:"0.08em",
+                    color:"#fff", fontSize:"14px", transform:"rotate(-2deg) translateX(-50%)" }}>
+                  <BadgeCheck className="inline h-4 w-4 mr-1 mb-0.5" />YOUR CURRENT PLAN
+                </div>
+              )}
+              {!isCurrent && plan.popular && (
                 <div className="absolute -top-5 left-1/2 -translate-x-1/2 burst-badge text-[#cc0000] px-4 py-1 text-sm whitespace-nowrap" style={{ transform:"rotate(-2deg) translateX(-50%)" }}>
                   ⚡ MOST POPULAR!
                 </div>
@@ -123,9 +180,20 @@ export default function PricingPage() {
                 </div>
                 <p className="text-sm text-[#555] mb-6">{plan.description}</p>
 
-                <Link href={plan.href} className={plan.buttonClass}>
-                  {plan.buttonText}
-                </Link>
+                {user ? (
+                  <button
+                    onClick={() => handlePlanClick(plan.name)}
+                    disabled={isCurrent || updatePlanMutation.isPending}
+                    className={buttonClass}
+                  >
+                    {isPending ? <Loader2 className="inline h-4 w-4 animate-spin mr-1" /> : null}
+                    {buttonLabel}
+                  </button>
+                ) : (
+                  <Link href={plan.name === "ENTERPRISE" ? "mailto:hello@chaiforms.dev" : plan.href} className={plan.buttonClass}>
+                    {plan.buttonText}
+                  </Link>
+                )}
 
                 <div className="mt-6 space-y-2.5">
                   {plan.features.map((f) => (
@@ -139,7 +207,8 @@ export default function PricingPage() {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

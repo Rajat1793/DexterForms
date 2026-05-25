@@ -266,3 +266,95 @@
 ::-webkit-scrollbar { width: 10px; }
 ::-webkit-scrollbar-track { background: #fffde7; border-left: 2px solid #000; }
 ::-webkit-scrollbar-thumb { background: #cc0000; border: 2px solid #000; }
+
+/* ===== STICKER EFFECT ===== */
+
+/* White backing that makes images look like printed stickers */
+.sticker-card {
+  background: #ffffff;
+  padding: 8px;
+  border: 2.5px solid #1a1a1a;
+  box-shadow: 5px 7px 0 rgba(0, 0, 0, 0.45);
+  display: inline-block;
+}
+
+/* Sticky tape strip — cartoon masking-tape look */
+.sticker-tape {
+  position: absolute;
+  height: 30px;
+  background: repeating-linear-gradient(
+    -55deg,
+    #F4AE52 0px,
+    #F4AE52 4px,
+    #f7c074 4px,
+    #f7c074 9px
+  );
+  border: 2px solid rgba(180, 120, 20, 0.65);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+  z-index: 10;
+}
+
+/* ===== LAB MASCOT ANIMATIONS ===== */
+
+/* Gentle floating bob — flask on a heating plate */
+@keyframes lab-float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-22px); }
+}
+
+/* Electric spark burst — experiment going haywire */
+@keyframes lab-spark {
+  0%, 86%, 100% { filter: brightness(1) drop-shadow(0 0 0px transparent); }
+  88%  { filter: brightness(1.7) drop-shadow(0 0 14px #ffd700) drop-shadow(0 0 8px #ff6600); }
+  90%  { filter: brightness(1.1) drop-shadow(0 0 4px #ffe066); }
+  92%  { filter: brightness(1.9) drop-shadow(0 0 18px #00cfff) drop-shadow(0 0 10px #0044ff); }
+  94%  { filter: brightness(1)   drop-shadow(0 0 0px transparent); }
+}
+
+/* Chemical reaction shake — volatile compound mixing */
+@keyframes lab-shake {
+  0%, 70%, 100% { transform: translateX(0); }
+  73% { transform: translateX(-9px); }
+  76% { transform: translateX(9px); }
+  79% { transform: translateX(-6px); }
+  82% { transform: translateX(6px); }
+  85% { transform: translateX(-3px); }
+  88% { transform: translateX(3px); }
+  91% { transform: translateX(0); }
+}
+
+/* Pendulum sway — mechanical arm oscillating */
+@keyframes lab-sway {
+  0%, 100% { transform: rotate(-7deg) translateX(-5px); }
+  25%      { transform: rotate(1deg)  translateX(1px); }
+  50%      { transform: rotate(9deg)  translateX(7px); }
+  75%      { transform: rotate(1deg)  translateX(1px); }
+}
+
+/* Scale pulse — something alive inside a tube */
+@keyframes lab-pulse {
+  0%, 100% { transform: scale(1); }
+  40%      { transform: scale(1.11); }
+  60%      { transform: scale(1.05); }
+}
+
+/* Digital glitch — lab computer malfunctioning */
+@keyframes lab-glitch {
+  0%, 78%, 100% { transform: translate(0, 0)     skewX(0deg);   filter: none; }
+  80%           { transform: translate(-11px, 3px) skewX(-10deg); filter: hue-rotate(90deg); }
+  82%           { transform: translate(11px, -3px) skewX(8deg);   filter: hue-rotate(-90deg); }
+  84%           { transform: translate(-5px, 0)    skewX(-4deg);  filter: hue-rotate(40deg); }
+  86%           { transform: translate(2px, 0)     skewX(2deg);   filter: none; }
+  88%           { transform: translate(0, 0)       skewX(0deg);   filter: none; }
+}
+
+/* Cartoon bounce — something dropped from a high shelf */
+@keyframes lab-bounce {
+  0%, 62%, 100% { transform: translateY(0)    scaleY(1)    scaleX(1); }
+  68%           { transform: translateY(-26px) scaleY(1.06) scaleX(0.94); }
+  74%           { transform: translateY(7px)   scaleY(0.91) scaleX(1.06); }
+  80%           { transform: translateY(-12px) scaleY(1.03) scaleX(0.97); }
+  86%           { transform: translateY(3px)   scaleY(0.97) scaleX(1.02); }
+  92%           { transform: translateY(-5px)  scaleY(1.01) scaleX(0.99); }
+  96%           { transform: translateY(0)     scaleY(1)    scaleX(1); }
+}

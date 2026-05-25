@@ -40,35 +40,53 @@ const DEMO_SPECIMENS = [
 
 export default function LandingPage() {
   const { user } = useAuth();
-  type DecorImg = { src: string; top: number; side: "left" | "right"; offset: number; rotate: number; size: number };
+  type DecorImg = { src: string; top: number; side: "left" | "right"; offset: number; rotate: number; size: number; tapeAngle: number; tapeWidth: number };
   const [decorImgs, setDecorImgs] = useState<DecorImg[] | null>(null);
 
   useEffect(() => {
-    const srcs = [
-      "/dexter1.png", "/dexter2.png", "/dee-dee.jpg", "/dexter-flask.jpg",
-      "/dexter-pose.png", "/dexter-deedee.png", "/dexter-face.jpeg", "/dexter-lab.jpeg",
-    ];
-    const shuffled = [...srcs].sort(() => Math.random() - 0.5);
     const rnd = (min: number, max: number) => min + Math.random() * (max - min);
-    setDecorImgs([
-      { src: shuffled[0]!, top: rnd(2,6),    side:"right", offset:rnd(0,1),  rotate:rnd(-8,10),  size:rnd(140,180) },
-      { src: shuffled[1]!, top: rnd(12,16),  side:"left",  offset:rnd(0,1),  rotate:rnd(-12,8),  size:rnd(130,165) },
-      { src: shuffled[2]!, top: rnd(23,27),  side:"right", offset:rnd(0,1),  rotate:rnd(-6,14),  size:rnd(135,170) },
-      { src: shuffled[3]!, top: rnd(34,38),  side:"left",  offset:rnd(0,1),  rotate:rnd(-15,10), size:rnd(140,175) },
-      { src: shuffled[4]!, top: rnd(47,51),  side:"right", offset:rnd(0,1),  rotate:rnd(-8,12),  size:rnd(130,165) },
-      { src: shuffled[5]!, top: rnd(58,62),  side:"left",  offset:rnd(0,1),  rotate:rnd(-10,8),  size:rnd(135,170) },
-      { src: shuffled[6]!, top: rnd(70,74),  side:"right", offset:rnd(0,1),  rotate:rnd(-12,6),  size:rnd(130,165) },
-      { src: shuffled[7]!, top: rnd(82,86),  side:"left",  offset:rnd(0,1),  rotate:rnd(-8,14),  size:rnd(135,170) },
-    ]);
+    fetch("/api/mascots")
+      .then(r => r.json())
+      .then(({ images }: { images: string[] }) => {
+        const shuffled = [...images].sort(() => Math.random() - 0.5);
+        const pool = shuffled.slice(0, 10);
+        const count = pool.length;
+        if (count === 0) return;
+        const topStep = 88 / count;
+        setDecorImgs(
+          Array.from({ length: count }, (_, i) => {
+            return {
+              src: pool[i]!,
+              top: rnd(i * topStep + 2, i * topStep + topStep - 2),
+              side: i % 2 === 0 ? "right" : "left",
+              offset: rnd(0, 2),
+              rotate: rnd(-12, 12),
+              size: Math.round(rnd(130, 180)),
+              tapeAngle: +rnd(-5, 5).toFixed(1),
+              tapeWidth: Math.round(rnd(45, 68)),
+            };
+          })
+        );
+      });
   }, []);
 
   return (
     <div className="relative min-h-screen bg-[#fffde7] overflow-x-hidden">
-      {/* FLOATING MASCOTS */}
+      {/* FLOATING MASCOTS — sticker-taped to the page */}
       {decorImgs?.map((img, i) => (
-        <div key={i} className="pointer-events-none select-none absolute z-0"
-          style={{ top:`${img.top}%`, [img.side]:`${img.offset}%`, transform:`rotate(${img.rotate}deg)`, opacity:0.45 }}>
-          <Image src={img.src} alt="" width={Math.round(img.size)} height={Math.round(img.size)} className="object-contain drop-shadow-xl" />
+        <div key={i} className="pointer-events-none select-none absolute z-20"
+          style={{ top:`${img.top}%`, [img.side]:`${img.offset}%`, transform:`rotate(${img.rotate}deg)` }}>
+          {/* Sticker card — static, no animation */}
+          <div className="sticker-card">
+            <Image src={img.src} alt="" width={Math.round(img.size)} height={Math.round(img.size)} style={{ height: "auto", display: "block" }} className="object-contain" />
+          </div>
+          {/* Tape strip anchored across the top, overlapping the sticker edge */}
+          <div className="sticker-tape" style={{
+            width: `${img.tapeWidth}%`,
+            top: "-10px",
+            left: "50%",
+            transform: `translateX(-50%) rotate(${img.tapeAngle}deg)`,
+          }} />
         </div>
       ))}
 
@@ -77,7 +95,7 @@ export default function LandingPage() {
       {/* NAV */}
       <nav className="bg-white sticky top-0 z-50" style={{ borderBottom:"4px solid #000", boxShadow:"0 4px 0 #000" }}>
         <div className="mx-auto max-w-7xl flex items-center justify-between px-6 py-3">
-          <Link href="/"><Image src="/dexterlogo.png" alt="ChaiForms" height={40} width={160} className="object-contain" priority /></Link>
+          <Link href="/"><Image src="/dexterlogo.png" alt="ChaiForms" height={40} width={160} style={{ height: "auto" }} className="object-contain" priority /></Link>
           <div className="hidden md:flex items-center gap-6">
             <Link href="/pricing" className="font-bold text-[#1a1a1a] hover:text-[#cc0000] uppercase text-sm tracking-wide">Pricing</Link>
             <Link href="http://localhost:8000/docs" target="_blank" className="font-bold text-[#1a1a1a] hover:text-[#cc0000] uppercase text-sm tracking-wide">API Docs</Link>
@@ -251,7 +269,7 @@ export default function LandingPage() {
         <div className="checker-strip -mt-10 mb-10" />
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <Image src="/dexterlogo.png" alt="ChaiForms" height={32} width={120} className="object-contain opacity-80" />
+            <Image src="/dexterlogo.png" alt="ChaiForms" height={32} width={120} style={{ height: "auto" }} className="object-contain opacity-80" />
             <p className="text-[#888] text-xs mt-1">&quot;OMELETTE DU FROMAGE&quot; — Dexter, S1E17</p>
           </div>
           <div className="flex items-center gap-6 text-xs text-[#888]">

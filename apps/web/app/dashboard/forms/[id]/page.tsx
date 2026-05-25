@@ -385,7 +385,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
   const isPublished = form.status === "published";
 
   return (
-    <div className="h-screen flex flex-col bg-[#fffde7]">
+    <div className="h-screen flex flex-col bg-[#fffde7] overflow-hidden">
       {/* Top bar */}
       <div className="bg-white px-6 py-3 flex items-center gap-4 flex-shrink-0"
         style={{ borderBottom:"4px solid #000", boxShadow:"0 4px 0 #000" }}>
