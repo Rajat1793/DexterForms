@@ -44,23 +44,30 @@ export default function LandingPage() {
   const [decorImgs, setDecorImgs] = useState<DecorImg[] | null>(null);
 
   useEffect(() => {
-    const srcs = ["/dexter1.png", "/dexter2.png", "/dexter3.png", "/dexter4.png"];
+    const srcs = [
+      "/dexter1.png", "/dexter2.png", "/dee-dee.jpg", "/dexter-flask.jpg",
+      "/dexter-pose.png", "/dexter-deedee.png", "/dexter-face.jpeg", "/dexter-lab.jpeg",
+    ];
     const shuffled = [...srcs].sort(() => Math.random() - 0.5);
     const rnd = (min: number, max: number) => min + Math.random() * (max - min);
     setDecorImgs([
-      { src: shuffled[0]!, top: rnd(5,14),  side:"right", offset:rnd(0,2),  rotate:rnd(-8,12),  size:rnd(200,280) },
-      { src: shuffled[1]!, top: rnd(28,40), side:"left",  offset:rnd(0,1),  rotate:rnd(-15,10), size:rnd(170,240) },
-      { src: shuffled[2]!, top: rnd(52,63), side:"right", offset:rnd(1,3),  rotate:rnd(-6,14),  size:rnd(190,260) },
-      { src: shuffled[3]!, top: rnd(73,84), side:"left",  offset:rnd(0,2),  rotate:rnd(-12,8),  size:rnd(180,250) },
+      { src: shuffled[0]!, top: rnd(2,6),    side:"right", offset:rnd(0,1),  rotate:rnd(-8,10),  size:rnd(140,180) },
+      { src: shuffled[1]!, top: rnd(12,16),  side:"left",  offset:rnd(0,1),  rotate:rnd(-12,8),  size:rnd(130,165) },
+      { src: shuffled[2]!, top: rnd(23,27),  side:"right", offset:rnd(0,1),  rotate:rnd(-6,14),  size:rnd(135,170) },
+      { src: shuffled[3]!, top: rnd(34,38),  side:"left",  offset:rnd(0,1),  rotate:rnd(-15,10), size:rnd(140,175) },
+      { src: shuffled[4]!, top: rnd(47,51),  side:"right", offset:rnd(0,1),  rotate:rnd(-8,12),  size:rnd(130,165) },
+      { src: shuffled[5]!, top: rnd(58,62),  side:"left",  offset:rnd(0,1),  rotate:rnd(-10,8),  size:rnd(135,170) },
+      { src: shuffled[6]!, top: rnd(70,74),  side:"right", offset:rnd(0,1),  rotate:rnd(-12,6),  size:rnd(130,165) },
+      { src: shuffled[7]!, top: rnd(82,86),  side:"left",  offset:rnd(0,1),  rotate:rnd(-8,14),  size:rnd(135,170) },
     ]);
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#fffde7]">
+    <div className="relative min-h-screen bg-[#fffde7] overflow-x-hidden">
       {/* FLOATING MASCOTS */}
       {decorImgs?.map((img, i) => (
-        <div key={i} className="pointer-events-none select-none fixed z-0"
-          style={{ top:`${img.top}%`, [img.side]:`${img.offset}%`, transform:`rotate(${img.rotate}deg)`, opacity:0.5 }}>
+        <div key={i} className="pointer-events-none select-none absolute z-0"
+          style={{ top:`${img.top}%`, [img.side]:`${img.offset}%`, transform:`rotate(${img.rotate}deg)`, opacity:0.45 }}>
           <Image src={img.src} alt="" width={Math.round(img.size)} height={Math.round(img.size)} className="object-contain drop-shadow-xl" />
         </div>
       ))}
@@ -109,12 +116,6 @@ export default function LandingPage() {
             <Link href="#demo" className="cartoon-btn bg-[#1565c0] text-white font-bangers text-2xl px-8 py-3 tracking-wider">
               🔭 VIEW DEMO FORMS
             </Link>
-          </div>
-          <div className="inline-block" style={{ background:"#fff9c4", border:"2px solid #000", boxShadow:"3px 3px 0 #000", padding:"8px 20px", transform:"rotate(1deg)" }}>
-            <span className="font-bold text-sm text-[#1a1a1a]">🔑 DEMO: </span>
-            <span className="font-mono text-sm text-[#cc0000]">demo@chaiforms.dev</span>
-            <span className="font-bold text-sm mx-2">/</span>
-            <span className="font-mono text-sm text-[#1565c0]">Demo@123456</span>
           </div>
         </div>
       </section>

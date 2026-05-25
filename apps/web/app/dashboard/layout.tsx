@@ -120,7 +120,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
         {/* Mascot */}
         <div className="px-4 pb-2 flex justify-center opacity-70">
-          <Image src="/dexter1.png" alt="Dexter" width={100} height={100} className="object-contain" />
+          <Image src="/dexter-lab.jpeg" alt="Dexter" width={110} height={110} className="object-contain" />
         </div>
       </aside>
 
