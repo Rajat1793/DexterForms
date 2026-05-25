@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Bangers, Comic_Neue } from "next/font/google";
 import "./globals.css";
 import { GlobalProviders } from "~/providers/global";
 
@@ -10,6 +11,18 @@ const geistSans = localFont({
 const geistMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
+});
+const bangers = Bangers({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-bangers",
+  display: "swap",
+});
+const comicNeue = Comic_Neue({
+  weight: ["400", "700"],
+  subsets: ["latin"],
+  variable: "--font-comic-neue",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -29,7 +42,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body suppressHydrationWarning className={`${geistSans.variable} ${geistMono.variable} ${bangers.variable} ${comicNeue.variable} antialiased`}>
         <GlobalProviders>{children}</GlobalProviders>
       </body>
     </html>

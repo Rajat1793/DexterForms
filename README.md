@@ -12,7 +12,7 @@
 ## ✨ Features
 
 - **12+ Field Types** — Short text, long text, email, number, date, single/multi select, dropdown, checkbox, rating, phone, URL
-- **13 Built-in Themes** — Minimal, Dark, Matrix, Sakura, Cyberpunk, Ocean, Nebula, Retro, Dracula, Naruto, Midnight, Startup, Dexter's Lab
+- **Dexter's Lab Theme** — Custom 90s cartoon genius scientist theme
 - **Public Form Filling** — No login required for respondents
 - **Real-time Form Builder** — Drag-and-drop field reordering, live preview, theme switcher
 - **Response Analytics** — Per-field distributions, daily trends chart, answer rates
@@ -100,9 +100,9 @@ Password: Demo@123456
 
 | Form | URL | Theme |
 |---|---|---|
-| Stranger Things Fan Survey | http://localhost:3000/f/stranger-things-fan-survey | Retro |
-| Anime Character Alignment Quiz | http://localhost:3000/f/anime-character-survey | Sakura |
-| Startup Pitch Validator | http://localhost:3000/f/startup-pitch-validator | Cyberpunk |
+| Stranger Things Fan Survey | http://localhost:3000/f/stranger-things-fan-survey | Dexter |
+| Anime Character Alignment Quiz | http://localhost:3000/f/anime-character-survey | Dexter |
+| Startup Pitch Validator | http://localhost:3000/f/startup-pitch-validator | Dexter |
 
 ---
 
@@ -156,22 +156,10 @@ Interactive API docs available at **http://localhost:8000/docs** (Scalar UI).
 
 ---
 
-## 🎨 Themes
+## 🎨 Theme
 
 | Theme | Description |
 |---|---|
-| minimal | Clean white with violet accents |
-| dark | Dark slate with violet |
-| matrix | Green on black terminal |
-| sakura | Pink anime-inspired |
-| cyberpunk | Neon purple and yellow |
-| ocean | Sky blue and calm |
-| nebula | Deep purple cosmos |
-| retro | Amber monospace |
-| dracula | Classic developer dark |
-| naruto | Orange ninja energy |
-| midnight | Deep night with amber |
-| startup | Emerald growth vibes |
 | dexter | 90s cartoon genius scientist |
 
 ---

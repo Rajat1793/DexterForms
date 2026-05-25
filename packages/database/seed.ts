@@ -7,7 +7,7 @@ import {
   responsesTable,
   responseAnswersTable,
 } from "./schema";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 
 const DEMO_USER = {
@@ -51,7 +51,7 @@ async function seed() {
 
   if (!user) throw new Error("Failed to create demo user");
 
-  // ─── Form 1: Stranger Things Fan Survey (Retro theme) ────────────────────
+  // ─── Form 1: Stranger Things Fan Survey ────────────────────────────────
   const [form1] = await db
     .insert(formsTable)
     .values({
@@ -68,9 +68,16 @@ async function seed() {
         "The Mind Flayer approves your response. Thanks for participating, Hawkins Hero! 🔦",
       responseCount: 0,
     })
+    .onConflictDoUpdate({
+      target: formsTable.slug,
+      set: { themeId: "dexter", updatedAt: new Date() },
+    })
     .returning();
 
   console.log("✓ Form 1: Stranger Things Fan Survey");
+
+  // Delete existing fields so we can re-seed cleanly
+  await db.delete(formFieldsTable).where(eq(formFieldsTable.formId, form1!.id));
 
   const form1Fields = await db
     .insert(formFieldsTable)
@@ -146,7 +153,7 @@ async function seed() {
 
   console.log(`  ↳ Added ${form1Fields.length} fields`);
 
-  // ─── Form 2: Anime Character Survey (Sakura theme) ───────────────────────
+  // ─── Form 2: Anime Character Survey ────────────────────────────────────
   const [form2] = await db
     .insert(formsTable)
     .values({
@@ -157,15 +164,21 @@ async function seed() {
       slug: "anime-character-survey",
       status: "published",
       visibility: "public",
-      themeId: "sakura",
+      themeId: "dexter",
       acceptingResponses: true,
       successMessage:
         "Sugoi! Your anime alignment has been recorded. Check the results on our community board! 🌸",
       responseCount: 0,
     })
+    .onConflictDoUpdate({
+      target: formsTable.slug,
+      set: { themeId: "dexter", updatedAt: new Date() },
+    })
     .returning();
 
   console.log("✓ Form 2: Anime Character Alignment Quiz");
+
+  await db.delete(formFieldsTable).where(eq(formFieldsTable.formId, form2!.id));
 
   const form2Fields = await db
     .insert(formFieldsTable)
@@ -261,7 +274,7 @@ async function seed() {
 
   console.log(`  ↳ Added ${form2Fields.length} fields`);
 
-  // ─── Form 3: Startup Pitch Validator (Cyberpunk theme) ───────────────────
+  // ─── Form 3: Startup Pitch Validator ────────────────────────────────────
   const [form3] = await db
     .insert(formsTable)
     .values({
@@ -272,15 +285,21 @@ async function seed() {
       slug: "startup-pitch-validator",
       status: "published",
       visibility: "public",
-      themeId: "cyberpunk",
+      themeId: "dexter",
       acceptingResponses: true,
       successMessage:
         "Your pitch has been logged in the matrix. Our council of VCs (very curious) will review it shortly. ⚡",
       responseCount: 0,
     })
+    .onConflictDoUpdate({
+      target: formsTable.slug,
+      set: { themeId: "dexter", updatedAt: new Date() },
+    })
     .returning();
 
   console.log("✓ Form 3: Startup Pitch Validator");
+
+  await db.delete(formFieldsTable).where(eq(formFieldsTable.formId, form3!.id));
 
   const form3Fields = await db
     .insert(formFieldsTable)
@@ -389,6 +408,17 @@ async function seed() {
   console.log(`  ↳ Added ${form3Fields.length} fields`);
 
   // ─── Seed Responses ──────────────────────────────────────────────────────
+  // Clean up existing responses first to avoid duplicates on re-seed
+  const formIds = [form1!.id, form2!.id, form3!.id];
+  const existingResponses = await db
+    .select({ id: responsesTable.id })
+    .from(responsesTable)
+    .where(inArray(responsesTable.formId, formIds));
+  if (existingResponses.length > 0) {
+    const responseIds = existingResponses.map((r) => r.id);
+    await db.delete(responseAnswersTable).where(inArray(responseAnswersTable.responseId, responseIds));
+    await db.delete(responsesTable).where(inArray(responsesTable.id, responseIds));
+  }
   await seedResponses(form1!, form1Fields, form2!, form2Fields, form3!, form3Fields);
 
   console.log("\n✅ Seeding complete!\n");

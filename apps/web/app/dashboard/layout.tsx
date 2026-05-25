@@ -5,50 +5,34 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "~/providers/auth";
-import {
-  LayoutDashboard,
-  FileText,
-  LogOut,
-  Plus,
-  Settings,
-  User,
-  ChevronDown,
-} from "lucide-react";
+import { LayoutDashboard, FileText, LogOut, Plus, ChevronDown } from "lucide-react";
 import { toast } from "sonner";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuSeparator, DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { user, isLoading, logout } = useAuth();
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      router.push("/auth/login");
-    }
+    if (!isLoading && !user) router.push("/auth/login");
   }, [user, isLoading, router]);
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0a0e1a]">
-        <div className="text-center font-mono">
-          <div className="h-12 w-12 border-2 border-lime-600 flex items-center justify-center text-lime-500 font-black text-xl mx-auto mb-4">D</div>
-          <div className="text-blue-400 text-xs tracking-widest animate-pulse">LOADING LAB...</div>
+      <div className="flex min-h-screen items-center justify-center bg-polka-yellow">
+        <div className="cartoon-card bg-white p-10 text-center">
+          <div className="font-bangers text-4xl text-[#cc0000] tracking-widest mb-2 animate-pulse" style={{ WebkitTextStroke:"2px #000" }}>
+            🧪 LOADING LAB...
+          </div>
+          <p className="font-bold text-[#555] text-sm">Warming up the experiments...</p>
         </div>
       </div>
     );
   }
-
   if (!user) return null;
 
   const handleLogout = () => {
@@ -63,86 +47,86 @@ export default function DashboardLayout({
   ];
 
   return (
-    <div className="min-h-screen bg-[#0a0e1a] font-mono">
-      {/* Sidebar */}
-      <aside className="fixed left-0 top-0 h-full w-64 bg-[#080d14] border-r border-lime-900/20 flex flex-col z-40">
+    <div className="min-h-screen bg-[#fffde7] flex">
+      {/* SIDEBAR */}
+      <aside className="fixed left-0 top-0 h-full w-64 bg-white flex flex-col z-40"
+        style={{ borderRight:"4px solid #000", boxShadow:"4px 0 0 #000" }}>
+
         {/* Logo */}
-        <div className="px-6 py-5 border-b border-lime-900/20">
-          <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
-            <Image src="/dexterlogo.png" alt="Dexter's Forms" height={32} width={120} className="object-contain" />
+        <div className="px-5 py-4" style={{ borderBottom:"3px solid #000" }}>
+          <Link href="/" className="block">
+            <Image src="/dexterlogo.png" alt="ChaiForms" height={36} width={140} className="object-contain" />
           </Link>
           <div className="mt-2 flex items-center gap-1.5">
-            <span className="h-1.5 w-1.5 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-xs text-green-400/70 tracking-widest">LAB ONLINE</span>
+            <span className="h-2 w-2 rounded-full bg-[#00a86b] animate-pulse" style={{ border:"1px solid #000" }} />
+            <span className="text-xs font-bold text-[#00a86b] tracking-wider uppercase">LAB ONLINE</span>
           </div>
         </div>
 
+        {/* New form CTA */}
+        <div className="px-4 pt-4 pb-2">
+          <Link href="/dashboard/forms/new"
+            className="cartoon-btn bg-[#cc0000] text-white font-bangers text-xl px-4 py-2.5 tracking-wider flex items-center justify-center gap-2 w-full">
+            <Plus className="h-5 w-5" />
+            NEW FORM!
+          </Link>
+        </div>
+
         {/* Nav */}
-        <nav className="flex-1 px-4 py-6 space-y-1">
+        <nav className="flex-1 px-3 py-3 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = item.exact
-              ? pathname === item.href
-              : pathname.startsWith(item.href);
+            const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 text-xs font-black tracking-widest uppercase transition-colors ${
-                  isActive
-                    ? "bg-lime-900/20 text-lime-400 border-l-2 border-lime-500"
-                    : "text-blue-300 hover:bg-lime-900/10 hover:text-white"
-                }`}
-              >
-                <Icon className="h-4 w-4" />
+              <Link key={item.href} href={item.href}
+                className="flex items-center gap-3 px-3 py-2.5 font-bold text-sm uppercase tracking-wide transition-all"
+                style={isActive
+                  ? { background:"#fff9c4", borderLeft:"4px solid #cc0000", color:"#cc0000", border:"2px solid #000", boxShadow:"2px 2px 0 #000" }
+                  : { color:"#1a1a1a", border:"2px solid transparent" }}>
+                <Icon className={`h-4 w-4 ${isActive ? "text-[#cc0000]" : "text-[#555]"}`} />
                 {item.label}
               </Link>
             );
           })}
         </nav>
 
-        {/* Create new form button */}
-        <div className="px-4 pb-4">
-          <Link
-            href="/dashboard/forms/new"
-            className="flex items-center justify-center gap-2 w-full rounded-none border border-lime-600 bg-lime-600/10 py-2.5 text-xs font-black text-lime-400 hover:bg-lime-600 hover:text-white tracking-widest uppercase transition-all"
-          >
-            <Plus className="h-4 w-4" />
-            NEW FORM
-          </Link>
-        </div>
-
-        {/* User */}
-        <div className="border-t border-lime-900/20 px-4 py-4">
+        {/* User area */}
+        <div className="px-3 py-4" style={{ borderTop:"3px solid #000" }}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-lime-900/10 transition-colors">
-                <div className="h-8 w-8 rounded-none border border-lime-700 bg-lime-900/20 flex items-center justify-center text-lime-400 font-black text-xs flex-shrink-0">
-                  {user.fullName.slice(0, 2).toUpperCase()}
+              <button className="flex items-center gap-2 w-full px-3 py-2 hover:bg-[#fffde7] transition-colors font-bold text-sm text-left"
+                style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000" }}>
+                <div className="h-8 w-8 bg-[#cc0000] flex items-center justify-center font-bangers text-white text-lg"
+                  style={{ border:"2px solid #000" }}>
+                  {user.fullName[0]?.toUpperCase()}
                 </div>
-                <div className="flex-1 text-left min-w-0">
-                  <p className="font-black text-white truncate text-xs tracking-wide">{user.fullName}</p>
-                  <p className="text-blue-400 truncate text-xs font-mono">{user.email}</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-[#1a1a1a] truncate">{user.fullName}</p>
+                  <p className="text-xs text-[#888] truncate">{user.email}</p>
                 </div>
-                <ChevronDown className="h-3 w-3 text-blue-400" />
+                <ChevronDown className="h-4 w-4 text-[#555]" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 bg-[#0f1520] border-lime-900/40 rounded-none">
-              <DropdownMenuSeparator className="bg-lime-900/20" />
-              <DropdownMenuItem
-                onClick={handleLogout}
-                className="text-lime-400 cursor-pointer font-mono text-xs tracking-wider hover:bg-lime-900/20 focus:bg-lime-900/20"
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                SIGN OUT
+            <DropdownMenuContent align="end" className="w-48 cartoon-card bg-white">
+              <DropdownMenuItem disabled className="text-xs text-[#888] font-bold">{user.email}</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout}
+                className="flex items-center gap-2 text-[#cc0000] font-bold cursor-pointer">
+                <LogOut className="h-4 w-4" /> Sign Out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+
+        {/* Mascot */}
+        <div className="px-4 pb-2 flex justify-center opacity-70">
+          <Image src="/dexter1.png" alt="Dexter" width={100} height={100} className="object-contain" />
+        </div>
       </aside>
 
-      {/* Main content */}
-      <main className="ml-64 min-h-screen">
+      {/* MAIN CONTENT */}
+      <main className="ml-64 flex-1 min-h-screen">
+        <div className="checker-strip" />
         {children}
       </main>
     </div>

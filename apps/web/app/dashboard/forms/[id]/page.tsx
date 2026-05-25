@@ -58,18 +58,7 @@ const FIELD_TYPES = [
 ];
 
 const THEMES = [
-  { id: "minimal", name: "Minimal", emoji: "✨" },
-  { id: "dark", name: "Dark", emoji: "🌙" },
-  { id: "matrix", name: "Matrix", emoji: "🟩" },
-  { id: "sakura", name: "Sakura", emoji: "🌸" },
-  { id: "cyberpunk", name: "Cyberpunk", emoji: "⚡" },
-  { id: "ocean", name: "Ocean", emoji: "🌊" },
-  { id: "nebula", name: "Nebula", emoji: "🔮" },
-  { id: "retro", name: "Retro", emoji: "👾" },
-  { id: "dracula", name: "Dracula", emoji: "🧛" },
-  { id: "naruto", name: "Naruto", emoji: "🍃" },
-  { id: "midnight", name: "Midnight", emoji: "🌙" },
-  { id: "startup", name: "Startup", emoji: "🚀" },
+  { id: "dexter", name: "Dexter's Lab", emoji: "🧪" },
 ];
 
 type Field = {
@@ -117,16 +106,16 @@ function SortableField({
       ref={setNodeRef}
       style={style}
       onClick={onSelect}
-      className={`group flex items-start gap-3 border p-4 cursor-pointer transition-all font-mono ${
+      className={`group flex items-start gap-3 border-[3px] p-4 cursor-pointer transition-all bg-white ${
         isSelected
-          ? "border-lime-500 bg-lime-900/10"
-          : "border-lime-900/20 bg-[#0f1520] hover:border-lime-900/40"
+          ? "border-[#cc0000] shadow-[3px_3px_0_#000]"
+          : "border-[#000] shadow-[2px_2px_0_#000] hover:shadow-[3px_3px_0_#000]"
       }`}
     >
       <button
         {...attributes}
         {...listeners}
-        className="mt-0.5 text-blue-400 hover:text-blue-200 cursor-grab"
+        className="mt-0.5 text-[#555] hover:text-[#1a1a1a] cursor-grab"
         onClick={(e) => e.stopPropagation()}
       >
         <GripVertical className="h-4 w-4" />
@@ -134,19 +123,19 @@ function SortableField({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <span className="text-xs">{fieldDef?.emoji}</span>
-          <span className="text-xs font-black text-white truncate tracking-wide">{field.label}</span>
+          <span className="text-xs font-bold text-[#1a1a1a] truncate">{field.label}</span>
           {field.required && (
-            <span className="text-lime-400 text-xs">*</span>
+            <span className="text-[#cc0000] text-xs font-bold">*</span>
           )}
         </div>
-        <div className="text-xs text-blue-400/80 mt-0.5 font-mono uppercase tracking-wider">{fieldDef?.label}</div>
+        <div className="text-xs text-[#888] mt-0.5 uppercase tracking-wider font-bold">{fieldDef?.label}</div>
       </div>
       <button
         onClick={(e) => {
           e.stopPropagation();
           onDelete();
         }}
-        className="opacity-0 group-hover:opacity-100 text-blue-400 hover:text-lime-400 transition-all"
+        className="opacity-0 group-hover:opacity-100 text-[#888] hover:text-[#cc0000] transition-all"
       >
         <Trash2 className="h-4 w-4" />
       </button>
@@ -180,45 +169,48 @@ function FieldEditor({
   };
 
   return (
-    <div className="space-y-5 font-mono">
+    <div className="space-y-5">
       <div>
-        <label className="block text-xs font-black text-blue-400/80 uppercase tracking-widest mb-2">&gt; Label</label>
+        <label className="block text-xs font-bold text-[#1a1a1a] uppercase tracking-wide mb-2">Label</label>
         <input
           type="text"
           value={field.label}
           onChange={(e) => onUpdate({ label: e.target.value })}
-          className="w-full border border-lime-900/30 bg-[#0a0d14] px-3 py-2 text-xs text-blue-100 font-mono focus:border-lime-500 focus:outline-none"
+          className="w-full px-3 py-2 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none focus:ring-2 focus:ring-[#cc0000]"
+          style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000" }}
           placeholder="Field label"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-black text-blue-400/80 uppercase tracking-widest mb-2">&gt; Placeholder</label>
+        <label className="block text-xs font-bold text-[#1a1a1a] uppercase tracking-wide mb-2">Placeholder</label>
         <input
           type="text"
           value={field.placeholder ?? ""}
           onChange={(e) => onUpdate({ placeholder: e.target.value })}
-          className="w-full border border-lime-900/30 bg-[#0a0d14] px-3 py-2 text-xs text-blue-100 font-mono focus:border-lime-500 focus:outline-none"
+          className="w-full px-3 py-2 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none focus:ring-2 focus:ring-[#cc0000]"
+          style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000" }}
           placeholder="Placeholder text"
         />
       </div>
 
       <div>
-        <label className="block text-xs font-black text-blue-400/80 uppercase tracking-widest mb-2">&gt; Description</label>
+        <label className="block text-xs font-bold text-[#1a1a1a] uppercase tracking-wide mb-2">Help Text</label>
         <textarea
           value={field.description ?? ""}
           onChange={(e) => onUpdate({ description: e.target.value })}
-          className="w-full border border-lime-900/30 bg-[#0a0d14] px-3 py-2 text-xs text-blue-100 font-mono focus:border-lime-500 focus:outline-none resize-none"
+          className="w-full px-3 py-2 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none focus:ring-2 focus:ring-[#cc0000] resize-none"
+          style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000" }}
           rows={2}
           placeholder="Help text for this field"
         />
       </div>
 
-      <div className="flex items-center justify-between border border-lime-900/20 px-3 py-2.5">
-        <span className="text-xs font-black text-blue-300 uppercase tracking-wider">Required</span>
+      <div className="flex items-center justify-between border border-[#ddd] px-3 py-2.5">
+        <span className="text-xs font-black text-[#555] uppercase tracking-wider">Required</span>
         <button
           onClick={() => onUpdate({ required: !field.required })}
-          className={`relative h-5 w-9 transition-colors ${field.required ? "bg-lime-600" : "bg-lime-900/20"}`}
+          className={`relative h-5 w-9 transition-colors ${field.required ? "bg-[#cc0000]" : "bg-[#fff0f0]"}`}
         >
           <span className={`absolute top-0.5 h-4 w-4 bg-white shadow transition-transform ${field.required ? "translate-x-4" : "translate-x-0.5"}`} />
         </button>
@@ -226,7 +218,7 @@ function FieldEditor({
 
       {hasOptions && (
         <div>
-          <label className="block text-xs font-black text-blue-400/80 uppercase tracking-widest mb-2">&gt; Options</label>
+          <label className="block text-xs font-bold text-[#1a1a1a] uppercase tracking-wide mb-2">Options</label>
           <div className="space-y-2">
             {options.map((opt, idx) => (
               <div key={idx} className="flex items-center gap-2">
@@ -234,16 +226,17 @@ function FieldEditor({
                   type="text"
                   value={opt.label}
                   onChange={(e) => updateOption(idx, e.target.value)}
-                  className="flex-1 border border-lime-900/30 bg-[#0a0d14] px-3 py-1.5 text-xs text-blue-100 font-mono focus:border-lime-500 focus:outline-none"
+                  className="flex-1 px-3 py-1.5 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none focus:ring-2 focus:ring-[#cc0000]"
+                  style={{ border:"2px solid #000" }}
                 />
-                <button onClick={() => removeOption(idx)} className="text-blue-400 hover:text-lime-400">
+                <button onClick={() => removeOption(idx)} className="text-[#555] hover:text-[#cc0000]">
                   <X className="h-4 w-4" />
                 </button>
               </div>
             ))}
             <button
               onClick={addOption}
-              className="flex items-center gap-1.5 text-xs text-lime-400 hover:text-lime-300 font-black tracking-wider uppercase"
+              className="flex items-center gap-1.5 text-xs text-[#cc0000] hover:text-lime-300 font-black tracking-wider uppercase"
             >
               <Plus className="h-3.5 w-3.5" />
               ADD OPTION
@@ -254,11 +247,11 @@ function FieldEditor({
 
       {field.type === "rating" && (
         <div>
-          <label className="block text-xs font-black text-blue-400/80 uppercase tracking-widest mb-2">&gt; Max Stars</label>
+          <label className="block text-xs font-black text-[#888] uppercase tracking-widest mb-2">&gt; Max Stars</label>
           <select
             value={(field.settings as any)?.maxRating ?? 5}
             onChange={(e) => onUpdate({ settings: { maxRating: parseInt(e.target.value) } })}
-            className="w-full border border-lime-900/30 bg-[#0a0d14] px-3 py-2 text-xs text-blue-100 font-mono focus:border-lime-500 focus:outline-none"
+            className="w-full px-3 py-2 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none focus:ring-2 focus:ring-[#cc0000]" style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000" }}
           >
             {[3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
               <option key={n} value={n}>{n} stars</option>
@@ -369,10 +362,10 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
 
   if (formLoading || fieldsLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#0a0e1a]">
+      <div className="flex items-center justify-center min-h-screen bg-[#fffde7]">
         <div className="text-center font-mono">
-          <Loader2 className="h-8 w-8 animate-spin text-lime-500 mx-auto mb-3" />
-          <div className="text-xs text-blue-400/50 tracking-widest animate-pulse">LOADING EXPERIMENT...</div>
+          <Loader2 className="h-8 w-8 animate-spin text-[#cc0000] mx-auto mb-3" />
+          <div className="text-xs text-[#999] tracking-widest animate-pulse">LOADING EXPERIMENT...</div>
         </div>
       </div>
     );
@@ -380,9 +373,9 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
 
   if (!form) {
     return (
-      <div className="p-8 font-mono bg-[#0a0e1a] min-h-screen">
-        <p className="text-lime-400 text-xs tracking-wider">⚠ EXPERIMENT NOT FOUND</p>
-        <Link href="/dashboard" className="text-blue-400 hover:text-lime-400 text-xs tracking-wider">← BACK TO LAB</Link>
+      <div className="p-8 font-mono bg-[#fffde7] min-h-screen">
+        <p className="text-[#cc0000] text-xs tracking-wider">⚠ EXPERIMENT NOT FOUND</p>
+        <Link href="/dashboard" className="text-[#555] hover:text-[#cc0000] text-xs tracking-wider">← BACK TO LAB</Link>
       </div>
     );
   }
@@ -390,10 +383,11 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
   const isPublished = form.status === "published";
 
   return (
-    <div className="h-screen flex flex-col bg-[#0a0e1a]">
+    <div className="h-screen flex flex-col bg-[#fffde7]">
       {/* Top bar */}
-      <div className="border-b border-lime-900/20 bg-[#080d14] px-6 py-3 flex items-center gap-4 flex-shrink-0 font-mono">
-        <Link href="/dashboard" className="text-blue-400 hover:text-lime-400 transition-colors">
+      <div className="bg-white px-6 py-3 flex items-center gap-4 flex-shrink-0"
+        style={{ borderBottom:"4px solid #000", boxShadow:"0 4px 0 #000" }}>
+        <Link href="/dashboard" className="text-[#cc0000] hover:text-[#aa0000] transition-colors">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div className="flex-1 min-w-0">
@@ -401,54 +395,44 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
             type="text"
             value={form.title}
             onChange={(e) => updateFormMutation.mutate({ id: formId, title: e.target.value })}
-            className="text-sm font-black text-white bg-transparent border-none outline-none w-full tracking-wider uppercase placeholder:text-blue-600"
+            className="text-base font-bangers text-[#1a1a1a] bg-transparent border-none outline-none w-full tracking-wider uppercase placeholder:text-[#888]"
           />
         </div>
 
         <div className="flex items-center gap-3">
-          <Link
-            href={`/dashboard/forms/${formId}/responses`}
-            className="flex items-center gap-1.5 border border-lime-900/30 px-3 py-1.5 text-xs text-blue-300 hover:bg-lime-900/10 hover:text-white tracking-wider uppercase transition-colors"
-          >
+          <Link href={`/dashboard/forms/${formId}/responses`}
+            className="flex items-center gap-1.5 font-bold text-xs text-[#555] hover:text-[#cc0000] px-3 py-1.5 bg-white transition-colors"
+            style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000" }}>
             <Users className="h-4 w-4" />
             {form.responseCount ?? 0} RESPONSES
           </Link>
 
-          <Link
-            href={`/dashboard/forms/${formId}/analytics`}
-            className="flex items-center gap-1.5 border border-lime-900/30 px-3 py-1.5 text-xs text-blue-300 hover:bg-lime-900/10 hover:text-white tracking-wider uppercase transition-colors"
-          >
+          <Link href={`/dashboard/forms/${formId}/analytics`}
+            className="flex items-center gap-1.5 font-bold text-xs text-[#555] hover:text-[#cc0000] px-3 py-1.5 bg-white transition-colors"
+            style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000" }}>
             <BarChart2 className="h-4 w-4" />
             ANALYTICS
           </Link>
 
           {isPublished && form.slug && (
-            <a
-              href={`/f/${form.slug}`}
-              target="_blank"
-              className="flex items-center gap-1.5 border border-green-700/40 bg-green-900/10 px-3 py-1.5 text-xs text-green-400 hover:bg-green-900/20 tracking-wider uppercase transition-colors"
-            >
+            <a href={`/f/${form.slug}`} target="_blank"
+              className="flex items-center gap-1.5 font-bold text-xs text-[#00a86b] hover:text-[#006b44] px-3 py-1.5 transition-colors"
+              style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000", background:"#e8f5e9" }}>
               <ExternalLink className="h-4 w-4" />
               VIEW LIVE
             </a>
           )}
 
           {isPublished ? (
-            <button
-              onClick={() => unpublishMutation.mutate({ id: formId })}
-              disabled={unpublishMutation.isPending}
-              className="border border-lime-900/30 px-4 py-1.5 text-xs font-black text-blue-300 hover:bg-lime-900/10 tracking-widest uppercase transition-colors"
-            >
+            <button onClick={() => unpublishMutation.mutate({ id: formId })} disabled={unpublishMutation.isPending}
+              className="cartoon-btn bg-white text-[#1a1a1a] font-bangers text-base px-4 py-1.5 tracking-wider">
               UNPUBLISH
             </button>
           ) : (
-            <button
-              onClick={() => publishMutation.mutate({ id: formId })}
-              disabled={publishMutation.isPending}
-              className="flex items-center gap-2 border border-lime-600 bg-lime-600 px-4 py-1.5 text-xs font-black text-white hover:bg-lime-700 tracking-widest uppercase transition-colors"
-            >
+            <button onClick={() => publishMutation.mutate({ id: formId })} disabled={publishMutation.isPending}
+              className="cartoon-btn bg-[#cc0000] text-white font-bangers text-base px-4 py-1.5 tracking-wider flex items-center gap-2">
               {publishMutation.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-              PUBLISH
+              PUBLISH!
             </button>
           )}
         </div>
@@ -457,17 +441,17 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
       {/* Main area */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left panel: field list */}
-        <div className="w-80 border-r border-lime-900/20 bg-[#080d14] flex flex-col overflow-hidden font-mono">
+        <div className="w-80 flex flex-col overflow-hidden" style={{ borderRight:"3px solid #000", background:"#fff9f9" }}>
           {/* Tabs */}
-          <div className="flex border-b border-lime-900/20">
+          <div className="flex" style={{ borderBottom:"3px solid #000" }}>
             {(["fields", "settings", "theme"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
                 className={`flex-1 py-2.5 text-xs font-black uppercase tracking-widest transition-colors ${
                   activeTab === tab
-                    ? "border-b-2 border-lime-500 text-lime-400 bg-lime-900/10"
-                    : "text-blue-300 hover:text-white hover:bg-lime-900/5"
+                    ? "border-b-[3px] border-[#cc0000] text-[#cc0000] bg-[#fff9c4]"
+                    : "text-[#555] hover:text-[#1a1a1a] hover:bg-[#fffde7]"
                 }`}
               >
                 {tab}
@@ -481,7 +465,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
                 {/* Add field button */}
                 <button
                   onClick={() => setShowFieldPicker(!showFieldPicker)}
-                  className="flex items-center justify-center gap-2 w-full border border-dashed border-lime-900/40 py-3 text-xs font-black text-lime-400 hover:border-lime-500 hover:bg-lime-900/10 tracking-widest uppercase transition-all"
+                  className="flex items-center justify-center gap-2 w-full border border-dashed border-[#bbb] py-3 text-xs font-black text-[#cc0000] hover:border-[#cc0000] hover:bg-[#fffde7] tracking-widest uppercase transition-all"
                 >
                   <Plus className="h-4 w-4" />
                   ADD FIELD
@@ -489,9 +473,9 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
 
                 {/* Field type picker */}
                 {showFieldPicker && (
-                  <div className="border border-lime-900/40 bg-[#0a0d14] overflow-hidden">
-                    <div className="p-2 border-b border-lime-900/20">
-                      <p className="text-xs font-black text-blue-400 px-2 tracking-widest uppercase">SELECT FIELD TYPE</p>
+                  <div className="border border-[#bbb] bg-white overflow-hidden">
+                    <div className="p-2 border-b border-[#ddd]">
+                      <p className="text-xs font-black text-[#555] px-2 tracking-widest uppercase">SELECT FIELD TYPE</p>
                     </div>
                     <div className="max-h-60 overflow-y-auto p-2">
                       {FIELD_TYPES.map((ft) => (
@@ -499,12 +483,12 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
                           key={ft.type}
                           onClick={() => handleAddField(ft.type)}
                           disabled={addFieldMutation.isPending}
-                          className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-lime-900/20 transition-colors"
+                          className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-[#fff9c4] transition-colors"
                         >
                           <span className="text-sm">{ft.emoji}</span>
                           <div>
-                            <div className="text-xs font-black text-white tracking-wide">{ft.label}</div>
-                            <div className="text-xs text-blue-400/80 font-mono">{ft.description}</div>
+                            <div className="text-xs font-black text-[#1a1a1a] tracking-wide">{ft.label}</div>
+                            <div className="text-xs text-[#888] font-mono">{ft.description}</div>
                           </div>
                         </button>
                       ))}
@@ -542,8 +526,8 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
 
                 {(fields as Field[]).length === 0 && !showFieldPicker && (
                   <div className="text-center py-8">
-                    <p className="text-xs text-blue-400 font-mono tracking-wider">NO FIELDS YET</p>
-                    <p className="text-xs text-blue-400/70 mt-1 font-mono">CLICK "ADD FIELD" TO START</p>
+                    <p className="text-xs text-[#555] font-mono tracking-wider">NO FIELDS YET</p>
+                    <p className="text-xs text-[#888] mt-1 font-mono">CLICK "ADD FIELD" TO START</p>
                   </div>
                 )}
               </div>
@@ -552,94 +536,88 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
             {activeTab === "settings" && (
               <div className="p-4 space-y-5">
                 <div>
-                  <label className="block text-xs font-black text-blue-400/80 uppercase tracking-widest mb-2">&gt; Form Title</label>
+                  <label className="block text-xs font-black text-[#888] uppercase tracking-widest mb-2">&gt; Form Title</label>
                   <input
                     type="text"
                     defaultValue={form.title}
                     onBlur={(e) => updateFormMutation.mutate({ id: formId, title: e.target.value })}
-                    className="w-full border border-lime-900/30 bg-[#0a0d14] px-3 py-2 text-xs text-blue-100 font-mono focus:border-lime-500 focus:outline-none"
+                    className="w-full px-3 py-2 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none focus:ring-2 focus:ring-[#cc0000]" style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000" }}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-black text-blue-400/80 uppercase tracking-widest mb-2">&gt; Description</label>
+                  <label className="block text-xs font-black text-[#888] uppercase tracking-widest mb-2">&gt; Description</label>
                   <textarea
                     defaultValue={form.description ?? ""}
                     onBlur={(e) => updateFormMutation.mutate({ id: formId, description: e.target.value })}
-                    className="w-full border border-lime-900/30 bg-[#0a0d14] px-3 py-2 text-xs text-blue-100 font-mono focus:border-lime-500 focus:outline-none resize-none"
+                    className="w-full border border-[#ccc] bg-white px-3 py-2 text-xs text-[#1a1a1a] font-mono focus:border-[#cc0000] focus:outline-none resize-none"
                     rows={3}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-black text-blue-400/80 uppercase tracking-widest mb-2">&gt; Visibility</label>
+                  <label className="block text-xs font-black text-[#888] uppercase tracking-widest mb-2">&gt; Visibility</label>
                   <select
                     defaultValue={form.visibility}
                     onChange={(e) => updateFormMutation.mutate({ id: formId, visibility: e.target.value as "public" | "unlisted" })}
-                    className="w-full border border-lime-900/30 bg-[#0a0d14] px-3 py-2 text-xs text-blue-100 font-mono focus:border-lime-500 focus:outline-none"
+                    className="w-full px-3 py-2 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none focus:ring-2 focus:ring-[#cc0000]" style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000" }}
                   >
                     <option value="public">Public (searchable)</option>
                     <option value="unlisted">Unlisted (link only)</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-black text-blue-400/80 uppercase tracking-widest mb-2">&gt; Custom Slug</label>
+                  <label className="block text-xs font-black text-[#888] uppercase tracking-widest mb-2">&gt; Custom Slug</label>
                   <input
                     type="text"
                     defaultValue={form.slug ?? ""}
                     onBlur={(e) => {
                       if (e.target.value) updateFormMutation.mutate({ id: formId, slug: e.target.value });
                     }}
-                    className="w-full border border-lime-900/30 bg-[#0a0d14] px-3 py-2 text-xs text-blue-100 font-mono focus:border-lime-500 focus:outline-none"
+                    className="w-full px-3 py-2 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none focus:ring-2 focus:ring-[#cc0000]" style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000" }}
                     placeholder="my-custom-slug"
                   />
                   {form.slug && (
-                    <p className="text-xs text-blue-400/70 mt-1 font-mono truncate">
+                    <p className="text-xs text-[#888] mt-1 font-mono truncate">
                       /f/{form.slug}
                     </p>
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-black text-blue-400/80 uppercase tracking-widest mb-2">&gt; Success Message</label>
+                  <label className="block text-xs font-black text-[#888] uppercase tracking-widest mb-2">&gt; Success Message</label>
                   <textarea
                     defaultValue={form.successMessage ?? "Thank you for your response!"}
                     onBlur={(e) => updateFormMutation.mutate({ id: formId, successMessage: e.target.value })}
-                    className="w-full border border-lime-900/30 bg-[#0a0d14] px-3 py-2 text-xs text-blue-100 font-mono focus:border-lime-500 focus:outline-none resize-none"
+                    className="w-full border border-[#ccc] bg-white px-3 py-2 text-xs text-[#1a1a1a] font-mono focus:border-[#cc0000] focus:outline-none resize-none"
                     rows={2}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-black text-blue-400/80 uppercase tracking-widest mb-2">&gt; Max Responses</label>
+                  <label className="block text-xs font-black text-[#888] uppercase tracking-widest mb-2">&gt; Max Responses</label>
                   <input
                     type="number"
                     defaultValue={form.maxResponses ?? ""}
                     onBlur={(e) => updateFormMutation.mutate({ id: formId, maxResponses: e.target.value ? parseInt(e.target.value) : null })}
-                    className="w-full border border-lime-900/30 bg-[#0a0d14] px-3 py-2 text-xs text-blue-100 font-mono focus:border-lime-500 focus:outline-none"
+                    className="w-full px-3 py-2 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none focus:ring-2 focus:ring-[#cc0000]" style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000" }}
                     placeholder="Unlimited"
                     min={1}
                   />
                 </div>
-                <div className="flex items-center justify-between border border-lime-900/20 px-3 py-2.5">
-                  <span className="text-xs text-blue-300 font-mono uppercase tracking-wider">Show progress bar</span>
+                <div className="flex items-center justify-between border border-[#ddd] px-3 py-2.5">
+                  <span className="text-xs text-[#555] font-mono uppercase tracking-wider">Show progress bar</span>
                   <button
                     onClick={() => updateFormMutation.mutate({ id: formId, showProgressBar: !form.showProgressBar })}
-                    className={`relative h-5 w-9 transition-colors ${form.showProgressBar ? "bg-lime-600" : "bg-lime-900/20"}`}
+                    className={`relative h-5 w-9 transition-colors ${form.showProgressBar ? "bg-[#cc0000]" : "bg-[#fff0f0]"}`}
                   >
                     <span className={`absolute top-0.5 h-4 w-4 bg-white shadow transition-transform ${form.showProgressBar ? "translate-x-4" : "translate-x-0.5"}`} />
                   </button>
                 </div>
                 {isPublished && form.slug && (
-                  <div className="border border-green-700/40 bg-green-900/10 p-4">
-                    <p className="text-xs font-black text-green-400 mb-2 tracking-widest">● PUBLISHED</p>
-                    <p className="text-xs text-green-300/60 font-mono break-all">
+                  <div className="p-4" style={{ border:"2px solid #00a86b", background:"#e8f5e9" }}>
+                    <p className="text-xs font-bangers text-[#00a86b] mb-2 tracking-widest">● PUBLISHED!</p>
+                    <p className="text-xs text-[#555] font-bold break-all">
                       {typeof window !== "undefined" ? window.location.origin : ""}/f/{form.slug}
                     </p>
-                    <button
-                      onClick={() => {
-                        const url = `${window.location.origin}/f/${form.slug}`;
-                        navigator.clipboard.writeText(url);
-                        toast.success("Link copied!");
-                      }}
-                      className="mt-2 text-xs text-green-400 font-black hover:text-green-300 tracking-wider uppercase"
-                    >
+                    <button onClick={() => { const url = `${window.location.origin}/f/${form.slug}`; navigator.clipboard.writeText(url); toast.success("Link copied!"); }}
+                      className="mt-2 text-xs text-[#00a86b] font-black hover:text-[#006b44] tracking-wider uppercase">
                       COPY LINK
                     </button>
                   </div>
@@ -649,7 +627,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
 
             {activeTab === "theme" && (
               <div className="p-4">
-                <p className="text-xs font-black text-blue-400 uppercase tracking-widest mb-3">&gt; CHOOSE THEME</p>
+                <p className="text-xs font-black text-[#555] uppercase tracking-widest mb-3">&gt; CHOOSE THEME</p>
                 <div className="grid grid-cols-2 gap-2">
                   {THEMES.map((theme) => (
                     <button
@@ -657,16 +635,16 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
                       onClick={() => updateFormMutation.mutate({ id: formId, themeId: theme.id })}
                       className={`flex items-center gap-2 border p-3 text-left transition-all ${
                         form.themeId === theme.id
-                          ? "border-lime-500 bg-lime-900/20"
-                          : "border-lime-900/20 hover:border-lime-900/40 hover:bg-lime-900/10"
+                          ? "border-[#cc0000] bg-[#fff0f0]"
+                          : "border-[#ddd] hover:border-[#bbb] hover:bg-[#fffde7]"
                       }`}
                     >
                       <span className="text-sm">{theme.emoji}</span>
                       <div>
-                        <div className="text-xs font-black text-white tracking-wide">{theme.name}</div>
+                        <div className="text-xs font-black text-[#1a1a1a] tracking-wide">{theme.name}</div>
                       </div>
                       {form.themeId === theme.id && (
-                        <Check className="h-3 w-3 text-lime-400 ml-auto" />
+                        <Check className="h-3 w-3 text-[#cc0000] ml-auto" />
                       )}
                     </button>
                   ))}
@@ -677,14 +655,14 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
         </div>
 
         {/* Center: form preview */}
-        <div className="flex-1 bg-[#0a0e1a] overflow-y-auto">
+        <div className="flex-1 bg-[#fffde7] overflow-y-auto">
           <div className="max-w-2xl mx-auto p-8 font-mono">
-            <div className="border border-lime-900/30 bg-[#0f1520] overflow-hidden">
-              <div className="bg-gradient-to-r from-lime-900 to-lime-800 border-b border-lime-700/40 p-6">
-                <div className="text-xs text-lime-300/80 tracking-widest mb-1 uppercase">// EXPERIMENT PREVIEW</div>
+            <div className="border border-[#ccc] bg-white overflow-hidden">
+              <div className="bg-[#cc0000] border-b border-[#aa0000] p-6">
+                <div className="text-xs text-[#ffd700] tracking-widest mb-1 uppercase font-bold">// FORM PREVIEW</div>
                 <h2 className="text-lg font-black text-white tracking-wider uppercase">{form.title}</h2>
                 {form.description && (
-                    <p className="text-lime-200/80 text-xs mt-1 font-mono">{form.description}</p>
+                    <p className="text-[#555] text-xs mt-1 font-mono">{form.description}</p>
                 )}
               </div>
               <div className="p-6 space-y-5">
@@ -694,16 +672,16 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
                     onClick={() => setSelectedFieldId(field.id)}
                     className={`cursor-pointer border p-4 transition-all ${
                       selectedFieldId === field.id
-                        ? "border-lime-500 bg-lime-900/10"
-                        : "border-lime-900/20 hover:border-lime-900/30"
+                        ? "border-[#cc0000] bg-[#fff9c4]"
+                        : "border-[#ddd] hover:border-[#ccc]"
                     }`}
                   >
-                    <label className="block text-xs font-black text-blue-200 mb-2 uppercase tracking-wider">
+                    <label className="block text-xs font-black text-[#1a1a1a] mb-2 uppercase tracking-wider">
                       {field.label}
-                      {field.required && <span className="text-lime-400 ml-1">*</span>}
+                      {field.required && <span className="text-[#cc0000] ml-1">*</span>}
                     </label>
                     {field.description && (
-                      <p className="text-xs text-blue-400 mb-2 font-mono">{field.description}</p>
+                      <p className="text-xs text-[#555] mb-2 font-mono">{field.description}</p>
                     )}
                     <FieldPreview field={field} />
                   </div>
@@ -711,12 +689,12 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
 
                 {(fields as Field[]).length === 0 && (
                   <div className="py-16 text-center">
-                    <p className="text-xs text-blue-400 font-mono tracking-wider">ADD FIELDS FROM THE LEFT PANEL</p>
+                    <p className="text-xs text-[#555] font-mono tracking-wider">ADD FIELDS FROM THE LEFT PANEL</p>
                   </div>
                 )}
 
                 {(fields as Field[]).length > 0 && (
-                  <button className="w-full border border-lime-600 bg-lime-600 py-3 text-xs font-black text-white hover:bg-lime-700 tracking-widest uppercase">
+                  <button className="w-full border border-[#cc0000] bg-[#cc0000] py-3 text-xs font-black text-white hover:bg-[#aa0000] tracking-widest uppercase">
                     SUBMIT RESPONSE
                   </button>
                 )}
@@ -727,13 +705,10 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
 
         {/* Right panel: field editor */}
         {selectedField && (
-          <div className="w-72 border-l border-lime-900/20 bg-[#080d14] overflow-y-auto font-mono">
-            <div className="px-4 py-3 border-b border-lime-900/20 flex items-center justify-between">
-              <h3 className="text-xs font-black text-white tracking-widest uppercase">EDIT FIELD</h3>
-              <button
-                onClick={() => setSelectedFieldId(null)}
-                className="text-blue-400 hover:text-lime-400 transition-colors"
-              >
+          <div className="w-72 overflow-y-auto bg-white" style={{ borderLeft:"3px solid #000" }}>
+            <div className="px-4 py-3 flex items-center justify-between bg-[#1565c0]" style={{ borderBottom:"3px solid #000" }}>
+              <h3 className="text-sm font-bangers text-white tracking-widest uppercase">EDIT FIELD</h3>
+              <button onClick={() => setSelectedFieldId(null)} className="text-white/70 hover:text-white transition-colors">
                 <X className="h-4 w-4" />
               </button>
             </div>
@@ -756,22 +731,22 @@ function FieldPreview({ field }: { field: Field }) {
 
   switch (field.type) {
     case "long_text":
-      return <div className="w-full h-16 border border-lime-900/30 bg-[#080d14] px-3 py-2 text-xs text-blue-500 font-mono">{field.placeholder ?? "Your answer..."}</div>;
+      return <div className="w-full h-16 border border-[#ccc] bg-white px-3 py-2 text-xs text-[#888] font-mono">{field.placeholder ?? "Your answer..."}</div>;
     case "single_select":
     case "multi_select":
       return (
         <div className="space-y-1.5">
           {(options.length > 0 ? options : [{ value: "opt1", label: "Option 1" }, { value: "opt2", label: "Option 2" }]).map((opt) => (
             <div key={opt.value} className="flex items-center gap-2">
-              <div className={`h-3.5 w-3.5 border border-lime-900/40 ${field.type === "multi_select" ? "" : "rounded-full"}`} />
-              <span className="text-xs text-blue-400/80 font-mono">{opt.label}</span>
+              <div className={`h-3.5 w-3.5 border border-[#bbb] ${field.type === "multi_select" ? "" : "rounded-full"}`} />
+              <span className="text-xs text-[#888] font-mono">{opt.label}</span>
             </div>
           ))}
         </div>
       );
     case "dropdown":
       return (
-        <div className="w-full h-8 border border-lime-900/30 bg-[#080d14] px-3 flex items-center justify-between text-xs text-blue-500 font-mono">
+        <div className="w-full h-8 border border-[#ccc] bg-white px-3 flex items-center justify-between text-xs text-[#888] font-mono">
           <span>{field.placeholder ?? "Select..."}</span>
           <ChevronDown className="h-3 w-3" />
         </div>
@@ -779,21 +754,21 @@ function FieldPreview({ field }: { field: Field }) {
     case "checkbox":
       return (
         <div className="flex items-center gap-2">
-          <div className="h-3.5 w-3.5 border border-lime-900/40" />
-          <span className="text-xs text-blue-400/80 font-mono">{field.placeholder ?? field.label}</span>
+          <div className="h-3.5 w-3.5 border border-[#bbb]" />
+          <span className="text-xs text-[#888] font-mono">{field.placeholder ?? field.label}</span>
         </div>
       );
     case "rating":
       return (
         <div className="flex gap-1">
           {Array.from({ length: maxRating }).map((_, i) => (
-            <div key={i} className={`h-6 w-6 flex items-center justify-center text-sm ${i < 3 ? "text-yellow-500" : "text-lime-900/30"}`}>★</div>
+            <div key={i} className={`h-6 w-6 flex items-center justify-center text-sm ${i < 3 ? "text-yellow-500" : "text-[#ddd]"}`}>★</div>
           ))}
         </div>
       );
     case "date":
-      return <div className="w-full h-8 border border-lime-900/30 bg-[#080d14] px-3 flex items-center text-xs text-blue-500 font-mono">mm/dd/yyyy</div>;
+      return <div className="w-full h-8 px-3 flex items-center text-xs text-[#888] bg-white border-2 border-[#000] font-mono">mm/dd/yyyy</div>;
     default:
-      return <div className="w-full h-8 border border-lime-900/30 bg-[#080d14] px-3 flex items-center text-xs text-blue-500 font-mono">{field.placeholder ?? "Your answer"}</div>;
+      return <div className="w-full h-8 px-3 flex items-center text-xs text-[#888] bg-white border-2 border-[#000] font-mono">{field.placeholder ?? "Your answer"}</div>;
   }
 }

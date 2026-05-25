@@ -100,12 +100,12 @@ const THEME_STYLES: Record<string, {
     progress: "bg-emerald-500",
   },
   dexter: {
-    bg: "bg-blue-50", card: "bg-white border-blue-300", text: "text-blue-950",
-    muted: "text-blue-600", accent: "text-lime-600", border: "border-blue-300",
-    input: "bg-blue-50 border-blue-300 text-blue-950 focus:border-lime-500 focus:ring-lime-500/20 font-mono",
-    button: "bg-lime-600 hover:bg-lime-700 text-white font-bold tracking-wider font-mono",
-    progress: "bg-lime-600",
-    fontFamily: "font-mono",
+    bg: "bg-[#fffde7]", card: "bg-white", text: "text-[#1a1a1a]",
+    muted: "text-[#555555]", accent: "text-[#cc0000]", border: "border-black",
+    input: "bg-white border-[3px] border-black text-[#1a1a1a] focus:border-[#cc0000] focus:ring-[#cc0000]/20",
+    button: "bg-[#cc0000] hover:bg-[#aa0000] text-white font-bangers tracking-wider",
+    progress: "bg-[#cc0000]",
+    fontFamily: "font-comic",
   },
 };
 

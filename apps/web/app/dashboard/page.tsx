@@ -4,36 +4,20 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { trpc } from "~/trpc/client";
 import { useAuth } from "~/providers/auth";
+import { Plus, FileText, Users, Globe, Copy, Trash2, MoreHorizontal, ExternalLink } from "lucide-react";
 import {
-  Plus,
-  FileText,
-  Users,
-  TrendingUp,
-  BarChart2,
-  ArrowRight,
-  Clock,
-  Globe,
-  Lock,
-  Copy,
-  Trash2,
-  MoreHorizontal,
-  ExternalLink,
-} from "lucide-react";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuSeparator, DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
 
-const STATUS_COLORS: Record<string, string> = {
-  draft: "bg-yellow-900/20 text-yellow-400 border border-yellow-700/30",
-  published: "bg-green-900/20 text-green-400 border border-green-700/30",
-  closed: "bg-lime-900/20 text-lime-400 border border-lime-700/30",
+const STATUS_BADGE: Record<string, string> = {
+  draft: "badge-draft",
+  published: "badge-published",
+  closed: "badge-closed",
 };
+const CARD_COLORS = ["bg-[#cc0000]","bg-[#1565c0]","bg-[#00a86b]","bg-[#ff8c00]","bg-[#7b1fa2]","bg-[#ff69b4]"];
 
 export default function DashboardPage() {
   const { user } = useAuth();
@@ -44,224 +28,127 @@ export default function DashboardPage() {
   const { data: forms, isLoading } = trpc.forms.list.useQuery();
 
   const deleteMutation = trpc.forms.delete.useMutation({
-    onSuccess: () => {
-      toast.success("Form deleted");
-      utils.forms.list.invalidate();
-      utils.forms.stats.invalidate();
-    },
+    onSuccess: () => { toast.success("Form deleted"); utils.forms.list.invalidate(); utils.forms.stats.invalidate(); },
     onError: (e) => toast.error(e.message),
   });
-
   const duplicateMutation = trpc.forms.duplicate.useMutation({
-    onSuccess: () => {
-      toast.success("Form duplicated!");
-      utils.forms.list.invalidate();
-    },
+    onSuccess: () => { toast.success("Form duplicated!"); utils.forms.list.invalidate(); },
     onError: (e) => toast.error(e.message),
   });
 
   const copyLink = (slug: string | null) => {
     if (!slug) return toast.error("Form has no public link yet");
-    const url = `${window.location.origin}/f/${slug}`;
-    navigator.clipboard.writeText(url);
-    toast.success("Link copied to clipboard!");
+    navigator.clipboard.writeText(`${window.location.origin}/f/${slug}`);
+    toast.success("Link copied!");
   };
 
   return (
-    <div className="p-8 font-mono">
+    <div className="p-8">
       {/* Header */}
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <div className="text-xs text-blue-400/80 tracking-widest mb-1 uppercase">// LABORATORY CONTROL PANEL</div>
-          <h1 className="text-2xl font-black text-white tracking-wider uppercase">
-            WELCOME, {user?.fullName.split(" ")[0].toUpperCase()}
+          <div className="burst-badge text-[#1a1a1a] px-3 py-0.5 text-sm mb-2 inline-block">🧪 LABORATORY CONTROL PANEL</div>
+          <h1 className="font-bangers text-stroke-black text-[#cc0000] tracking-wide" style={{ fontSize:"clamp(2rem,5vw,3.5rem)" }}>
+            WELCOME, {user?.fullName.split(" ")[0]?.toUpperCase()}!
           </h1>
-          <p className="text-blue-300 mt-1 text-xs tracking-wide">
-            MANAGE EXPERIMENTS &amp; TRACK DATA COLLECTION
-          </p>
+          <p className="font-bold text-[#555] text-sm mt-1">MANAGE EXPERIMENTS & TRACK DATA COLLECTION</p>
         </div>
-        <Link
-          href="/dashboard/forms/new"
-          className="flex items-center gap-2 rounded-none border border-lime-600 bg-lime-600 px-5 py-2.5 text-xs font-black text-white hover:bg-lime-700 tracking-widest uppercase transition-colors"
-        >
-          <Plus className="h-4 w-4" />
-          NEW EXPERIMENT
+        <Link href="/dashboard/forms/new"
+          className="cartoon-btn bg-[#cc0000] text-white font-bangers text-xl px-5 py-2.5 tracking-wider flex items-center gap-2">
+          <Plus className="h-5 w-5" /> NEW EXPERIMENT
         </Link>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+      {/* STATS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
         {[
-          {
-            label: "TOTAL FORMS",
-            value: stats?.totalForms ?? 0,
-            icon: FileText,
-            color: "text-lime-400",
-            bg: "bg-lime-900/20",
-            border: "border-lime-900/30",
-            tag: "EXP",
-          },
-          {
-            label: "PUBLISHED",
-            value: stats?.publishedForms ?? 0,
-            icon: Globe,
-            color: "text-green-400",
-            bg: "bg-green-900/20",
-            border: "border-green-900/30",
-            tag: "LIVE",
-          },
-          {
-            label: "RESPONSES",
-            value: stats?.totalResponses ?? 0,
-            icon: Users,
-            color: "text-blue-400",
-            bg: "bg-blue-900/20",
-            border: "border-blue-900/30",
-            tag: "DATA",
-          },
+          { label:"TOTAL FORMS",  value:stats?.totalForms ?? 0,      icon:FileText, color:"bg-[#cc0000]" },
+          { label:"PUBLISHED",    value:stats?.publishedForms ?? 0,  icon:Globe,    color:"bg-[#1565c0]" },
+          { label:"RESPONSES",    value:stats?.totalResponses ?? 0,  icon:Users,    color:"bg-[#00a86b]" },
         ].map((stat) => {
           const Icon = stat.icon;
           return (
-            <div
-              key={stat.label}
-              className={`rounded-none border ${stat.border} bg-[#0f1520] p-6`}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className={`h-10 w-10 ${stat.bg} flex items-center justify-center`}>
-                  <Icon className={`h-5 w-5 ${stat.color}`} />
-                </div>
-                <span className={`text-xs font-black ${stat.color} tracking-widest border ${stat.border} px-2 py-0.5`}>{stat.tag}</span>
+            <div key={stat.label} className="cartoon-card bg-white overflow-hidden">
+              <div className={`${stat.color} px-5 py-3 flex items-center gap-3`} style={{ borderBottom:"3px solid #000" }}>
+                <Icon className="h-6 w-6 text-white" />
+                <span className="font-bold text-white text-sm tracking-widest uppercase">{stat.label}</span>
               </div>
-              <div className={`text-3xl font-black ${stat.color}`}>{stat.value}</div>
-              <div className="text-xs text-blue-400 mt-1 tracking-widest">{stat.label}</div>
+              <div className="px-5 py-4">
+                <div className="font-bangers text-stroke-black text-[#1a1a1a]" style={{ fontSize:"clamp(2.5rem,5vw,4rem)" }}>
+                  {stat.value}
+                </div>
+              </div>
             </div>
           );
         })}
       </div>
 
-      {/* Forms list */}
+      {/* FORMS LIST */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-black text-white tracking-widest uppercase">// YOUR EXPERIMENTS</h2>
-          <Link href="/dashboard/forms" className="text-xs text-lime-400 hover:text-lime-300 font-black tracking-wider uppercase">
-            VIEW ALL →
-          </Link>
+          <h2 className="font-bangers text-2xl text-[#1a1a1a] tracking-wide">// YOUR EXPERIMENTS</h2>
+          <Link href="/dashboard/forms" className="font-bangers text-sm text-[#cc0000] tracking-wider hover:underline">VIEW ALL →</Link>
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="border border-lime-900/20 bg-[#0f1520] p-6 animate-pulse">
-                <div className="h-4 bg-lime-900/20 rounded w-3/4 mb-3" />
-                <div className="h-3 bg-lime-900/10 rounded w-1/2" />
-              </div>
+              <div key={i} className="h-44 bg-[#f0f0f0] animate-pulse" style={{ border:"3px solid #000", boxShadow:"4px 4px 0 #000" }} />
             ))}
           </div>
-        ) : forms?.length === 0 ? (
-          <div className="border-2 border-dashed border-lime-900/30 p-16 text-center">
-            <FileText className="h-12 w-12 text-lime-900/50 mx-auto mb-4" />
-            <h3 className="font-black text-white mb-2 tracking-wider">NO EXPERIMENTS YET</h3>
-            <p className="text-blue-400 text-xs mb-6 tracking-wide">INITIALIZE YOUR FIRST EXPERIMENT TO BEGIN DATA COLLECTION</p>
-            <Link
-              href="/dashboard/forms/new"
-              className="inline-flex items-center gap-2 border border-lime-600 bg-lime-600 px-6 py-3 text-xs font-black text-white hover:bg-lime-700 tracking-widest uppercase"
-            >
-              <Plus className="h-4 w-4" />
-              CREATE FORM
+        ) : !forms || forms.length === 0 ? (
+          <div className="cartoon-card bg-white p-12 text-center">
+            <div className="text-6xl mb-4">🔬</div>
+            <h3 className="font-bangers text-2xl text-[#1a1a1a] tracking-wide mb-2">NO EXPERIMENTS YET!</h3>
+            <p className="text-[#555] font-bold mb-6">Your laboratory is empty. Time to create your first experiment!</p>
+            <Link href="/dashboard/forms/new" className="cartoon-btn bg-[#cc0000] text-white font-bangers text-xl px-6 py-3 tracking-wider inline-flex items-center gap-2">
+              <Plus className="h-5 w-5" /> CREATE FIRST FORM
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {forms?.slice(0, 9).map((form) => (
-              <div
-                key={form.id}
-                className="group border border-lime-900/20 bg-[#0f1520] p-6 hover:border-lime-500/40 transition-all cursor-pointer"
-                onClick={() => router.push(`/dashboard/forms/${form.id}`)}
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-black text-white truncate tracking-wide text-sm">{form.title}</h3>
-                    {form.description && (
-                      <p className="text-blue-400 text-xs mt-1 truncate font-mono">{form.description}</p>
-                    )}
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {(forms ?? []).slice(0, 6).map((form, i) => (
+              <div key={form.id} className="cartoon-card bg-white overflow-hidden cursor-pointer group hover:-translate-y-0.5 transition-transform"
+                onClick={() => router.push(`/dashboard/forms/${form.id}`)}>
+                <div className={`${CARD_COLORS[i % CARD_COLORS.length]} px-4 py-3 flex items-center justify-between`}
+                  style={{ borderBottom:"3px solid #000" }}>
+                  <span className="font-bangers text-white text-base tracking-wide truncate">{form.title}</span>
                   <DropdownMenu>
-                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                      <button className="p-1 hover:bg-lime-900/20 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <MoreHorizontal className="h-4 w-4 text-blue-400" />
+                    <DropdownMenuTrigger asChild>
+                      <button className="text-white/80 hover:text-white p-1" onClick={(e) => e.stopPropagation()}>
+                        <MoreHorizontal className="h-4 w-4" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-[#0f1520] border-lime-900/40 rounded-none">
-                      {form.status === "published" && (
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            copyLink(form.slug);
-                          }}
-                          className="text-blue-300 font-mono text-xs hover:bg-lime-900/20 focus:bg-lime-900/20"
-                        >
-                          <Copy className="h-4 w-4 mr-2" />
-                          Copy link
-                        </DropdownMenuItem>
-                      )}
-                      {form.slug && form.status === "published" && (
-                        <DropdownMenuItem
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            window.open(`/f/${form.slug}`, "_blank");
-                          }}
-                          className="text-blue-300 font-mono text-xs hover:bg-lime-900/20 focus:bg-lime-900/20"
-                        >
-                          <ExternalLink className="h-4 w-4 mr-2" />
-                          Open form
-                        </DropdownMenuItem>
-                      )}
-                      <DropdownMenuItem
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          duplicateMutation.mutate({ id: form.id });
-                        }}
-                        className="text-blue-300 font-mono text-xs hover:bg-lime-900/20 focus:bg-lime-900/20"
-                      >
-                        <Copy className="h-4 w-4 mr-2" />
-                        Duplicate
+                    <DropdownMenuContent align="end" className="cartoon-card bg-white w-44">
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/forms/${form.id}`); }} className="font-bold cursor-pointer">
+                        <FileText className="h-4 w-4 mr-2" /> Edit Form
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator className="bg-lime-900/20" />
-                      <DropdownMenuItem
-                        className="text-lime-400 font-mono text-xs hover:bg-lime-900/20 focus:bg-lime-900/20"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (confirm("Delete this form? This cannot be undone.")) {
-                            deleteMutation.mutate({ id: form.id });
-                          }
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
+                      {form.slug && (
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); window.open(`/f/${form.slug}`, "_blank"); }} className="font-bold cursor-pointer">
+                          <ExternalLink className="h-4 w-4 mr-2" /> View Live
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); copyLink(form.slug ?? null); }} className="font-bold cursor-pointer">
+                        <Copy className="h-4 w-4 mr-2" /> Copy Link
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); duplicateMutation.mutate({ id: form.id }); }} className="font-bold cursor-pointer">
+                        <Copy className="h-4 w-4 mr-2" /> Duplicate
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); if (confirm("Delete this form?")) deleteMutation.mutate({ id: form.id }); }} className="font-bold text-[#cc0000] cursor-pointer">
+                        <Trash2 className="h-4 w-4 mr-2" /> Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-
-                <div className="flex items-center gap-3 mb-4">
-                  <span className={`px-2 py-0.5 text-xs font-black uppercase tracking-wider ${STATUS_COLORS[form.status] ?? STATUS_COLORS.draft}`}>
-                    {form.status}
-                  </span>
-                  <span className="text-blue-400 text-xs font-mono">
-                    {form.responseCount ?? 0} responses
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between text-xs text-blue-400 font-mono">
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {form.createdAt
-                      ? formatDistanceToNow(new Date(form.createdAt), { addSuffix: true })
-                      : "Recently"}
-                  </span>
-                  <span className="flex items-center gap-1 text-lime-400 opacity-0 group-hover:opacity-100 transition-opacity font-black tracking-wider">
-                    EDIT <ArrowRight className="h-3 w-3" />
-                  </span>
+                <div className="p-4">
+                  {form.description && <p className="text-xs text-[#555] mb-3 line-clamp-2">{form.description}</p>}
+                  <div className="flex items-center justify-between">
+                    <span className={`${STATUS_BADGE[form.status] ?? "badge-draft"} text-xs px-2 py-0.5`}>{form.status}</span>
+                    <span className="text-xs text-[#888] font-bold">
+                      {form.updatedAt ? formatDistanceToNow(new Date(form.updatedAt), { addSuffix: true }) : ""}
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
