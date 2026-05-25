@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ConfirmModal } from "~/components/ui/confirm-modal";
 import { trpc } from "~/trpc/client";
 import { useAuth } from "~/providers/auth";
 import { Plus, FileText, Users, Globe, Copy, Trash2, MoreHorizontal, ExternalLink } from "lucide-react";
@@ -35,6 +37,8 @@ export default function DashboardPage() {
     onSuccess: () => { toast.success("Form duplicated!"); utils.forms.list.invalidate(); },
     onError: (e) => toast.error(e.message),
   });
+
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const copyLink = (slug: string | null) => {
     if (!slug) return toast.error("Form has no public link yet");
@@ -135,7 +139,7 @@ export default function DashboardPage() {
                         <Copy className="h-4 w-4 mr-2" /> Duplicate
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); if (confirm("Delete this form?")) deleteMutation.mutate({ id: form.id }); }} className="font-bold text-[#cc0000] cursor-pointer">
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setPendingDeleteId(form.id); }} className="font-bold text-[#cc0000] cursor-pointer">
                         <Trash2 className="h-4 w-4 mr-2" /> Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -151,10 +155,16 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+            ))}          </div>
         )}
       </div>
+
+      <ConfirmModal
+        open={!!pendingDeleteId}
+        message="This form and all its responses will be permanently deleted."
+        onConfirm={() => { deleteMutation.mutate({ id: pendingDeleteId! }); setPendingDeleteId(null); }}
+        onCancel={() => setPendingDeleteId(null)}
+      />
     </div>
   );
 }

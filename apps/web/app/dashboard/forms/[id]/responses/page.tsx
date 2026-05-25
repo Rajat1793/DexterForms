@@ -2,6 +2,7 @@
 
 import { use, useState } from "react";
 import Link from "next/link";
+import { ConfirmModal } from "~/components/ui/confirm-modal";
 import { trpc } from "~/trpc/client";
 import { ArrowLeft, Download, Trash2, Eye, Mail, Clock } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
@@ -13,6 +14,7 @@ export default function ResponsesPage({ params }: { params: Promise<{ id: string
 
   const [page, setPage] = useState(0);
   const [selectedResponse, setSelectedResponse] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const limit = 20;
 
   const { data: form } = trpc.forms.getById.useQuery({ id: formId });
@@ -179,7 +181,7 @@ export default function ResponsesPage({ params }: { params: Promise<{ id: string
           <div>
             <div className="px-6 py-4 flex items-center justify-between bg-[#1565c0]" style={{ borderBottom:"3px solid #000" }}>
               <h2 className="font-bangers text-xl text-white tracking-widest uppercase">📋 RESPONSE</h2>
-              <button onClick={() => { if (confirm("Delete this response?")) { deleteMutation.mutate({ formId, responseId: selectedResponse }); } }}
+              <button onClick={() => setPendingDeleteId(selectedResponse)}
                 className="text-white/70 hover:text-white transition-colors">
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -233,6 +235,15 @@ export default function ResponsesPage({ params }: { params: Promise<{ id: string
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        open={!!pendingDeleteId}
+        title="DELETE RESPONSE?"
+        message="This response and all its answers will be permanently deleted."
+        confirmLabel="DELETE!"
+        onConfirm={() => { deleteMutation.mutate({ formId, responseId: pendingDeleteId! }); setPendingDeleteId(null); setSelectedResponse(null); }}
+        onCancel={() => setPendingDeleteId(null)}
+      />
     </div>
   );
 }

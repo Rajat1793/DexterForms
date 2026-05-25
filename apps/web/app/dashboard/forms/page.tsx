@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { ConfirmModal } from "~/components/ui/confirm-modal";
 import { trpc } from "~/trpc/client";
 import { Plus, Search, MoreVertical, Eye, Copy, BarChart2, Trash2, FileText } from "lucide-react";
 import { toast } from "sonner";
@@ -28,6 +29,7 @@ export default function FormsPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const { data: forms, isLoading, refetch } = trpc.forms.list.useQuery(undefined);
 
@@ -133,7 +135,7 @@ export default function FormsPage() {
                     className="cartoon-btn bg-white text-[#1a1a1a] font-bangers text-sm py-1.5 px-3 tracking-wider">
                     <BarChart2 className="h-4 w-4" />
                   </button>
-                  <button onClick={() => { if (confirm("Delete this form?")) deleteMutation.mutate({ id: form.id }); }}
+                  <button onClick={() => setPendingDeleteId(form.id)}
                     className="cartoon-btn bg-[#cc0000] text-white font-bangers text-sm py-1.5 px-3 tracking-wider">
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -143,6 +145,13 @@ export default function FormsPage() {
           ))}
         </div>
       )}
+
+      <ConfirmModal
+        open={!!pendingDeleteId}
+        message="This form and all its responses will be permanently deleted."
+        onConfirm={() => { deleteMutation.mutate({ id: pendingDeleteId! }); setPendingDeleteId(null); }}
+        onCancel={() => setPendingDeleteId(null)}
+      />
     </div>
   );
 }

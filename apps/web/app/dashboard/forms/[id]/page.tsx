@@ -2,6 +2,7 @@
 
 import { useState, use } from "react";
 import Link from "next/link";
+import { ConfirmModal } from "~/components/ui/confirm-modal";
 import { useRouter } from "next/navigation";
 import { trpc } from "~/trpc/client";
 import { toast } from "sonner";
@@ -271,6 +272,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
   const [activeTab, setActiveTab] = useState<"fields" | "settings" | "theme">("fields");
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
   const [showFieldPicker, setShowFieldPicker] = useState(false);
+  const [pendingDeleteFieldId, setPendingDeleteFieldId] = useState<string | null>(null);
 
   const { data: form, isLoading: formLoading } = trpc.forms.getById.useQuery({ id: formId });
   const { data: fields = [], isLoading: fieldsLoading } = trpc.fields.getByForm.useQuery({ formId });
@@ -513,11 +515,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
                           field={field}
                           isSelected={selectedFieldId === field.id}
                           onSelect={() => setSelectedFieldId(field.id)}
-                          onDelete={() => {
-                            if (confirm("Remove this field?")) {
-                              deleteFieldMutation.mutate({ formId, fieldId: field.id });
-                            }
-                          }}
+                          onDelete={() => setPendingDeleteFieldId(field.id)}
                         />
                       ))}
                     </div>
@@ -721,6 +719,15 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
           </div>
         )}
       </div>
+
+      <ConfirmModal
+        open={!!pendingDeleteFieldId}
+        title="REMOVE FIELD?"
+        message="This field and any collected data for it will be permanently removed."
+        confirmLabel="REMOVE!"
+        onConfirm={() => { deleteFieldMutation.mutate({ formId, fieldId: pendingDeleteFieldId! }); setPendingDeleteFieldId(null); }}
+        onCancel={() => setPendingDeleteFieldId(null)}
+      />
     </div>
   );
 }
