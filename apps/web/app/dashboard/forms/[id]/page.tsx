@@ -419,9 +419,9 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
   return (
     <div className="h-screen flex flex-col bg-polka-yellow overflow-hidden">
       {/* Top bar */}
-      <div className="bg-white px-6 py-3 flex items-center gap-4 flex-shrink-0"
+      <div className="bg-white px-3 md:px-6 py-3 flex items-center gap-2 md:gap-4 flex-shrink-0"
         style={{ borderBottom:"4px solid #000", boxShadow:"0 4px 0 #000" }}>
-        <Link href="/dashboard" className="text-[#cc0000] hover:text-[#aa0000] transition-colors">
+        <Link href="/dashboard" className="text-[#cc0000] hover:text-[#aa0000] transition-colors flex-shrink-0">
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div className="flex-1 min-w-0">
@@ -433,38 +433,39 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
           />
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 md:gap-3">
           <Link href={`/dashboard/forms/${formId}/responses`}
-            className="flex items-center gap-1.5 font-bold text-xs text-[#555] hover:text-[#cc0000] px-3 py-1.5 bg-white transition-colors"
+            className="hidden sm:flex items-center gap-1.5 font-bold text-xs text-[#555] hover:text-[#cc0000] px-2 md:px-3 py-1.5 bg-white transition-colors"
             style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000" }}>
             <Users className="h-4 w-4" />
-            {form.responseCount ?? 0} RESPONSES
+            <span className="hidden md:inline">{form.responseCount ?? 0} RESPONSES</span>
+            <span className="md:hidden">{form.responseCount ?? 0}</span>
           </Link>
 
           <Link href={`/dashboard/forms/${formId}/analytics`}
-            className="flex items-center gap-1.5 font-bold text-xs text-[#555] hover:text-[#cc0000] px-3 py-1.5 bg-white transition-colors"
+            className="hidden sm:flex items-center gap-1.5 font-bold text-xs text-[#555] hover:text-[#cc0000] px-2 md:px-3 py-1.5 bg-white transition-colors"
             style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000" }}>
             <BarChart2 className="h-4 w-4" />
-            ANALYTICS
+            <span className="hidden md:inline">ANALYTICS</span>
           </Link>
 
           {isPublished && form.slug && (
             <a href={`/f/${form.slug}`} target="_blank"
-              className="flex items-center gap-1.5 font-bold text-xs text-[#00a86b] hover:text-[#006b44] px-3 py-1.5 transition-colors"
+              className="hidden sm:flex items-center gap-1.5 font-bold text-xs text-[#00a86b] hover:text-[#006b44] px-2 md:px-3 py-1.5 transition-colors"
               style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000", background:"#e8f5e9" }}>
               <ExternalLink className="h-4 w-4" />
-              VIEW LIVE
+              <span className="hidden md:inline">VIEW LIVE</span>
             </a>
           )}
 
           {isPublished ? (
             <button onClick={() => unpublishMutation.mutate({ id: formId })} disabled={unpublishMutation.isPending}
-              className="cartoon-btn bg-white text-[#1a1a1a] font-bangers text-base px-4 py-1.5 tracking-wider">
+              className="cartoon-btn bg-white text-[#1a1a1a] font-bangers text-sm md:text-base px-3 md:px-4 py-1.5 tracking-wider">
               UNPUBLISH
             </button>
           ) : (
             <button onClick={() => publishMutation.mutate({ id: formId })} disabled={publishMutation.isPending}
-              className="cartoon-btn bg-[#cc0000] text-white font-bangers text-base px-4 py-1.5 tracking-wider flex items-center gap-2">
+              className="cartoon-btn bg-[#cc0000] text-white font-bangers text-sm md:text-base px-3 md:px-4 py-1.5 tracking-wider flex items-center gap-2">
               {publishMutation.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
               PUBLISH!
             </button>
@@ -472,10 +473,10 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
         </div>
       </div>
 
-      {/* Main area */}
-      <div className="flex flex-1 overflow-hidden">
+      {/* Main area — horizontal scroll on small screens so builder stays usable */}
+      <div className="flex flex-1 overflow-hidden overflow-x-auto">
         {/* Left panel: field list */}
-        <div className="w-80 flex flex-col overflow-hidden" style={{ borderRight:"3px solid #000", background:"#fff9f9" }}>
+        <div className="w-72 md:w-80 flex-shrink-0 flex flex-col overflow-hidden" style={{ borderRight:"3px solid #000", background:"#fff9f9" }}>
           {/* Tabs */}
           <div className="flex" style={{ borderBottom:"3px solid #000" }}>
             {(["fields", "settings", "theme"] as const).map((tab) => (

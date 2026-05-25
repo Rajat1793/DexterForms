@@ -49,9 +49,9 @@ export default function FormsPage() {
   });
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 md:mb-8">
         <div>
           <div className="burst-badge text-[#1a1a1a] px-3 py-0.5 text-sm mb-2 inline-block">🗂️ EXPERIMENT ARCHIVE</div>
           <h1 className="font-bangers text-stroke-black text-[#1a1a1a] tracking-wide" style={{ fontSize:"clamp(2rem,4vw,3rem)" }}>ALL FORMS</h1>

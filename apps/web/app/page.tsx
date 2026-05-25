@@ -39,7 +39,7 @@ const DEMO_SPECIMENS = [
 ];
 
 export default function LandingPage() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   type DecorImg = { src: string; top: number; side: "left" | "right"; offset: number; rotate: number; size: number; tapeAngle: number; tapeWidth: number };
   const [decorImgs, setDecorImgs] = useState<DecorImg[] | null>(null);
 
@@ -74,7 +74,7 @@ export default function LandingPage() {
     <div className="relative min-h-screen bg-[#fffde7] overflow-x-hidden">
       {/* FLOATING MASCOTS — sticker-taped to the page */}
       {decorImgs?.map((img, i) => (
-        <div key={i} className="pointer-events-none select-none absolute z-20"
+        <div key={i} className="pointer-events-none select-none absolute z-20 hidden md:block"
           style={{ top:`${img.top}%`, [img.side]:`${img.offset}%`, transform:`rotate(${img.rotate}deg)` }}>
           {/* Sticker card — static, no animation */}
           <div className="sticker-card">
@@ -102,7 +102,10 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-3">
             {user ? (
-              <Link href="/dashboard" className="cartoon-btn bg-[#cc0000] text-white font-bangers text-lg px-5 py-2 tracking-wider">ENTER LAB →</Link>
+              <>
+                <Link href="/dashboard" className="cartoon-btn bg-[#cc0000] text-white font-bangers text-lg px-5 py-2 tracking-wider">ENTER LAB →</Link>
+                <button onClick={logout} className="font-bold text-[#1a1a1a] hover:text-[#cc0000] uppercase text-sm tracking-wide transition-colors">Logout</button>
+              </>
             ) : (
               <>
                 <Link href="/auth/login" className="font-bold text-[#1a1a1a] hover:text-[#cc0000] uppercase text-sm tracking-wide">Login</Link>
@@ -114,7 +117,7 @@ export default function LandingPage() {
       </nav>
 
       {/* HERO */}
-      <section className="relative overflow-hidden py-20 px-6 bg-polka-yellow">
+      <section className="relative overflow-hidden py-12 md:py-20 px-4 md:px-6 bg-polka-yellow">
         <div className="relative z-10 max-w-4xl mx-auto text-center">
           <div className="burst-badge text-[#1a1a1a] px-4 py-1 text-base mb-6 inline-block">
             🧪 CLASSIFIED TOP SECRET EXPERIMENT!
@@ -127,11 +130,11 @@ export default function LandingPage() {
             Build epic forms. Collect data like a <em>genius scientist</em>.<br />
             <span className="text-[#cc0000]">No PhD required.</span> 🔬
           </p>
-          <div className="flex flex-wrap gap-4 justify-center mb-6">
-            <Link href={user ? "/dashboard" : "/auth/register"} className="cartoon-btn bg-[#cc0000] text-white font-bangers text-2xl px-8 py-3 tracking-wider">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 justify-center mb-6">
+            <Link href={user ? "/dashboard" : "/auth/register"} className="cartoon-btn bg-[#cc0000] text-white font-bangers text-xl sm:text-2xl px-6 sm:px-8 py-3 tracking-wider text-center">
               🧪 START EXPERIMENTING!
             </Link>
-            <Link href="#demo" className="cartoon-btn bg-[#1565c0] text-white font-bangers text-2xl px-8 py-3 tracking-wider">
+            <Link href="#demo" className="cartoon-btn bg-[#1565c0] text-white font-bangers text-xl sm:text-2xl px-6 sm:px-8 py-3 tracking-wider text-center">
               🔭 VIEW DEMO FORMS
             </Link>
           </div>
@@ -153,7 +156,7 @@ export default function LandingPage() {
       </div>
 
       {/* FEATURES */}
-      <section className="bg-white py-20 px-6" style={{ borderBottom:"4px solid #000" }}>
+      <section className="bg-white py-12 md:py-20 px-4 md:px-6" style={{ borderBottom:"4px solid #000" }}>
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <div className="burst-badge text-[#1a1a1a] px-4 py-1 text-base mb-4 inline-block" style={{ transform:"rotate(-1deg)" }}>💡 WHAT&apos;S IN THE LAB?</div>

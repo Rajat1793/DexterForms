@@ -48,9 +48,9 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="p-8">
+    <div className="p-4 md:p-8">
       {/* Header */}
-      <div className="mb-8 flex items-center justify-between">
+      <div className="mb-6 md:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="burst-badge text-[#1a1a1a] px-3 py-0.5 text-sm mb-2 inline-block">🧪 LABORATORY CONTROL PANEL</div>
           <h1 className="font-bangers text-stroke-black text-[#cc0000] tracking-wide" style={{ fontSize:"clamp(2rem,5vw,3.5rem)" }}>

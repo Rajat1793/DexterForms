@@ -44,7 +44,7 @@ export function MascotStickers({ count = 3 }: { count?: number }) {
   return (
     <>
       {stickers.map((img, i) => (
-        <div key={i} className="pointer-events-none select-none absolute z-20"
+        <div key={i} className="pointer-events-none select-none absolute z-20 hidden md:block"
           style={{ top: `${img.top}%`, [img.side]: `${img.offset}%`, transform: `rotate(${img.rotate}deg)` }}>
           <div className="sticker-card">
             <Image src={img.src} alt="" width={img.size} height={img.size}
