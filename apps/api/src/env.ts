@@ -5,6 +5,8 @@ const envSchema = z.object({
   NODE_ENV: z.enum(["development", "prod"]).default("development"),
   BASE_URL: z.string().default("http://localhost:8000"),
   FRONTEND_URL: z.string().default("http://localhost:3000"),
+  // Comma-separated list of extra allowed CORS origins (used in production)
+  CORS_ORIGINS: z.string().optional(),
 });
 
 function createEnv(env: NodeJS.ProcessEnv) {

@@ -18,13 +18,16 @@ export const app = express();
 app.set("trust proxy", 1);
 
 // CORS
+const allowedOrigins = [
+  env.FRONTEND_URL,
+  "http://localhost:3000",
+  "http://localhost:3001",
+  ...(env.CORS_ORIGINS ? env.CORS_ORIGINS.split(",").map((o) => o.trim()) : []),
+];
+
 app.use(
   cors({
-    origin: [
-      env.FRONTEND_URL,
-      "http://localhost:3000",
-      "http://localhost:3001",
-    ],
+    origin: allowedOrigins,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],

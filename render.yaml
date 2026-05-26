@@ -24,9 +24,11 @@ services:
           name: chaiforms-db
           property: connectionString
       - key: BASE_URL
-        sync: false          # set manually after first deploy
+        value: https://chaiforms-api-jsfp.onrender.com
       - key: FRONTEND_URL
-        sync: false          # set to your web service URL
+        value: https://chaiforms-web.onrender.com
+      - key: CORS_ORIGINS
+        value: https://chaiforms-web.onrender.com
       - key: JWT_SECRET
         generateValue: true  # Render generates a secure random value
       - key: JWT_EXPIRES_IN
@@ -62,6 +64,6 @@ services:
       - key: NODE_ENV
         value: production
       - key: NEXT_PUBLIC_API_URL
-        sync: false          # set to https://<chaiforms-api>.onrender.com/trpc
+        value: https://chaiforms-api-jsfp.onrender.com/trpc
       - key: NEXT_PUBLIC_APP_URL
-        sync: false          # set to https://<chaiforms-web>.onrender.com
+        value: https://chaiforms-web.onrender.com
