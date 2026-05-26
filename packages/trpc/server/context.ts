@@ -10,9 +10,14 @@ export async function createContext({
 }) {
   let user: JWTPayload | null = null;
 
-  const authHeader = req.headers.authorization;
-  if (authHeader?.startsWith("Bearer ")) {
-    const token = authHeader.slice(7);
+  // Prefer httpOnly cookie; fall back to Authorization header for backward compat
+  const token =
+    (req.cookies as Record<string, string | undefined>)?.df_token ??
+    (req.headers.authorization?.startsWith("Bearer ")
+      ? req.headers.authorization.slice(7)
+      : null);
+
+  if (token) {
     try {
       user = verifyJWT(token);
     } catch {

@@ -1,4 +1,4 @@
-# 🍵 ChaiForms
+# 🧪 DexterForms
 
 > A production-style, Typeform-inspired form builder SaaS — built with a modern full-stack TypeScript monorepo and a 90s Dexter's Lab cartoon theme.
 
@@ -55,8 +55,8 @@
 ### 1. Clone & Install
 
 ```bash
-git clone <your-repo-url> chaiforms
-cd chaiforms
+git clone <your-repo-url> dexterforms
+cd dexterforms
 pnpm install
 ```
 
@@ -96,7 +96,7 @@ pnpm dev
 ### Demo Login
 
 ```
-Email:    demo@chaiforms.dev
+Email:    demo@dexterforms.dev
 Password: Demo@123456
 ```
 
@@ -239,7 +239,7 @@ DATABASE_URL="postgresql://..." pnpm db:seed
    FRONTEND_URL=https://<your-vercel-app>.vercel.app
    BASE_URL=https://<your-render-service>.onrender.com
    ```
-5. Click **Deploy** — note the public URL (e.g. `https://chaiforms-api.onrender.com`)
+5. Click **Deploy** — note the public URL (e.g. `https://dexterforms-api.onrender.com`)
 
 > **Note**: Free Render services sleep after 15 minutes of inactivity. The first request after sleep takes ~30 seconds to wake up. Upgrade to a paid plan ($7/mo) to keep it always-on.
 
@@ -375,8 +375,8 @@ MIT
 ### 1. Clone & Install
 
 ```bash
-git clone <repo-url> chaiforms
-cd chaiforms
+git clone <repo-url> dexterforms
+cd dexterforms
 pnpm install
 ```
 
@@ -416,7 +416,7 @@ pnpm dev
 ## 🎭 Demo Credentials
 
 ```
-Email:    demo@chaiforms.dev
+Email:    demo@dexterforms.dev
 Password: Demo@123456
 ```
 
@@ -505,7 +505,7 @@ response_answers -> id, responseId, fieldId, value
 | Variable | Default | Description |
 |---|---|---|
 | `DATABASE_URL` | `postgresql://postgres:postgres@localhost:5432/dev` | PostgreSQL connection |
-| `JWT_SECRET` | `chaiforms-super-secret-...` | JWT signing secret |
+| `JWT_SECRET` | `dexterforms-super-secret-...` | JWT signing secret |
 | `JWT_EXPIRES_IN` | `7d` | Token expiry |
 | `NEXT_PUBLIC_API_URL` | `http://localhost:8000/trpc` | API URL for browser |
 | `FRONTEND_URL` | `http://localhost:3000` | CORS origin |

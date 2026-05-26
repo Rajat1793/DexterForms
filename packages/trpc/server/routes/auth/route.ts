@@ -3,6 +3,7 @@ import { userService } from "../../services";
 import { getAuthenticationMethodOutputSchema } from "@repo/services/user/model";
 import { publicProcedure, protectedProcedure, router } from "../../trpc";
 import { generatePath } from "../../utils/path-generator";
+import { TRPCError } from "@trpc/server";
 
 const TAGS = ["Authentication"];
 const getPath = generatePath("/authentication");
@@ -44,12 +45,26 @@ export const authRouter = router({
         }),
       })
     )
-    .mutation(async ({ input }) => {
-      const { user, token } = await userService.register(input);
-      return {
-        token,
-        user: { id: user.id, fullName: user.fullName, email: user.email, plan: user.plan ?? "FREE" },
-      };
+    .mutation(async ({ input, ctx }) => {
+      try {
+        const { user, token } = await userService.register(input);
+        ctx.res.cookie("df_token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV !== "development",
+          sameSite: "lax",
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+          path: "/",
+        });
+        return {
+          token,
+          user: { id: user.id, fullName: user.fullName, email: user.email, plan: user.plan ?? "FREE" },
+        };
+      } catch (err) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: err instanceof Error ? err.message : "Registration failed",
+        });
+      }
     }),
 
   login: publicProcedure
@@ -73,12 +88,26 @@ export const authRouter = router({
         }),
       })
     )
-    .mutation(async ({ input }) => {
-      const { user, token } = await userService.login(input);
-      return {
-        token,
-        user: { id: user.id, fullName: user.fullName, email: user.email, plan: user.plan ?? "FREE" },
-      };
+    .mutation(async ({ input, ctx }) => {
+      try {
+        const { user, token } = await userService.login(input);
+        ctx.res.cookie("df_token", token, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV !== "development",
+          sameSite: "lax",
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+          path: "/",
+        });
+        return {
+          token,
+          user: { id: user.id, fullName: user.fullName, email: user.email, plan: user.plan ?? "FREE" },
+        };
+      } catch (err) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: err instanceof Error ? err.message : "Invalid credentials",
+        });
+      }
     }),
 
   me: protectedProcedure
@@ -98,7 +127,7 @@ export const authRouter = router({
     )
     .query(async ({ ctx }) => {
       const user = await userService.getUserById(ctx.user.userId);
-      if (!user) throw new Error("User not found");
+      if (!user) throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
       return {
         id: user.id,
         fullName: user.fullName,
@@ -144,7 +173,25 @@ export const authRouter = router({
     )
     .output(z.object({ success: z.boolean() }))
     .mutation(async ({ input }) => {
-      await userService.resetPassword(input.token, input.newPassword);
+      try {
+        await userService.resetPassword(input.token, input.newPassword);
+        return { success: true };
+      } catch (err) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: err instanceof Error ? err.message : "Invalid or expired reset token",
+        });
+      }
+    }),
+
+  logout: publicProcedure
+    .meta({
+      openapi: { method: "POST", path: getPath("/logout"), tags: TAGS },
+    })
+    .input(zodUndefinedModel)
+    .output(z.object({ success: z.boolean() }))
+    .mutation(async ({ ctx }) => {
+      ctx.res.clearCookie("df_token", { path: "/" });
       return { success: true };
     }),
 });

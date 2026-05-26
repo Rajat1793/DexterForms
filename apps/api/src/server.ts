@@ -98,6 +98,12 @@ app.get("/health", (_req, res) => {
   return res.json({ message: "DexterForms API is healthy", healthy: true });
 });
 
+// REST logout — clears the httpOnly cookie. Used by the frontend auth provider.
+app.post("/logout", (_req, res) => {
+  res.clearCookie("df_token", { path: "/" });
+  return res.json({ success: true });
+});
+
 logger.debug(`OpenAPI JSON: ${env.BASE_URL}/openapi.json`);
 app.get("/openapi.json", (_req, res) => {
   return res.json(openApiDocument);
@@ -116,8 +122,7 @@ app.use(
 // Apply auth rate limiting to auth endpoints
 app.use("/api/authentication", authLimiter);
 
-// Apply submit rate limiting to public submission endpoint
-app.use("/api/public/forms", submitLimiter);
+// Apply submit rate limiting to public submission endpoint only (not form reads)
 app.use("/trpc/public.submitResponse", submitLimiter);
 app.use("/trpc/auth.login", authLimiter);
 app.use("/trpc/auth.register", authLimiter);

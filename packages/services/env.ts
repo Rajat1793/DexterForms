@@ -4,7 +4,7 @@ const envSchema = z.object({
   GOOGLE_OAUTH_CLIENT_ID: z.string().optional(),
   GOOGLE_OAUTH_CLIENT_SECRET: z.string().optional(),
   GOOGLE_OAUTH_REDIRECT_URI: z.string().optional(),
-  JWT_SECRET: z.string().default("dexterforms-dev-secret"),
+  JWT_SECRET: z.string().min(32, "JWT_SECRET must be at least 32 characters"),
   JWT_EXPIRES_IN: z.string().default("7d"),
   SMTP_HOST: z.string().optional(),
   SMTP_PORT: z.string().optional(),

@@ -14,10 +14,13 @@ class UserService {
     email: string;
     password: string;
   }) {
+    const normalizedEmail = data.email.toLowerCase().trim();
+    const trimmedName = data.fullName.trim();
+
     const existing = await db
       .select()
       .from(usersTable)
-      .where(eq(usersTable.email, data.email))
+      .where(eq(usersTable.email, normalizedEmail))
       .limit(1);
 
     if (existing.length > 0) {
@@ -29,10 +32,10 @@ class UserService {
     const [user] = await db
       .insert(usersTable)
       .values({
-        fullName: data.fullName,
-        email: data.email,
+        fullName: trimmedName,
+        email: normalizedEmail,
         passwordHash,
-        emailVerified: false,
+        emailVerified: true,
       })
       .returning();
 
@@ -48,10 +51,12 @@ class UserService {
   }
 
   public async login(data: { email: string; password: string }) {
+    const normalizedEmail = data.email.toLowerCase().trim();
+
     const [user] = await db
       .select()
       .from(usersTable)
-      .where(eq(usersTable.email, data.email))
+      .where(eq(usersTable.email, normalizedEmail))
       .limit(1);
 
     if (!user) throw new Error("Invalid email or password");

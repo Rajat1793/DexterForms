@@ -24,7 +24,10 @@ import {
   Loader2,
   Check,
   X,
+  QrCode,
 } from "lucide-react";
+import { QRCodeSVG } from "qrcode.react";
+import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
 import {
   DndContext,
   closestCenter,
@@ -456,6 +459,34 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
               <ExternalLink className="h-4 w-4" />
               <span className="hidden md:inline">VIEW LIVE</span>
             </a>
+          )}
+
+          {isPublished && form.slug && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  className="hidden sm:flex items-center gap-1.5 font-bold text-xs text-[#555] hover:text-[#1565c0] px-2 md:px-3 py-1.5 bg-white transition-colors"
+                  style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000" }}
+                  title="Share QR code"
+                >
+                  <QrCode className="h-4 w-4" />
+                  <span className="hidden md:inline">QR</span>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-64 p-4" style={{ border:"3px solid #000", boxShadow:"4px 4px 0 #000" }}>
+                <p className="font-bangers text-sm text-[#cc0000] tracking-widest mb-3 text-center">📱 SCAN TO FILL FORM</p>
+                <div className="flex justify-center mb-3">
+                  <QRCodeSVG
+                    value={`${typeof window !== "undefined" ? window.location.origin : ""}/f/${form.slug}`}
+                    size={180}
+                    bgColor="#ffffff"
+                    fgColor="#1a1a1a"
+                    level="M"
+                  />
+                </div>
+                <p className="text-xs font-mono text-[#555] text-center break-all">/f/{form.slug}</p>
+              </PopoverContent>
+            </Popover>
           )}
 
           {isPublished ? (

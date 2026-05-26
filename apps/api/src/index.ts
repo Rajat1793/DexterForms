@@ -21,7 +21,7 @@ async function init() {
       };
       const line = `${c.yellow}${"═".repeat(46)}${c.reset}`;
       console.log(`\n${line}`);
-      console.log(`${c.yellow}║${c.reset}  ${c.red}${c.bold}🍵  C H A I F O R M S${c.reset}                     ${c.yellow}║${c.reset}`);
+      console.log(`${c.yellow}║${c.reset}  ${c.red}${c.bold}🧪  D E X T E R F O R M S${c.reset}                 ${c.yellow}║${c.reset}`);
       console.log(`${c.yellow}║${c.reset}  ${c.gray}Dexter's Forms Lab — API Server${c.reset}          ${c.yellow}║${c.reset}`);
       console.log(`${line}`);
       console.log(`${c.yellow}║${c.reset}  ${c.green}✓${c.reset} API       ${c.cyan}http://localhost:${PORT}${c.reset}        ${c.yellow}║${c.reset}`);

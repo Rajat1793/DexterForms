@@ -197,6 +197,8 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
 
   const submitMutation = trpc.public.submitResponse.useMutation({
     onSuccess: () => {
+      // Prevent duplicate submissions for this anonymous user
+      if (form?.id) localStorage.setItem(`submitted_form_${form.id}`, "1");
       if (form?.redirectUrl) {
         window.location.href = form.redirectUrl;
       } else {
@@ -249,11 +251,38 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
           newErrors[field.id] = "Please enter a valid number";
         }
       }
+
+      // Enforce field-level validations from the schema (minLength, maxLength, min, max, pattern)
+      const v = field.validations as Record<string, unknown> | null;
+      if (v) {
+        if (field.type === "number" && !isNaN(Number(val))) {
+          if (v.min !== undefined && Number(val) < Number(v.min))
+            newErrors[field.id] = `Minimum value is ${v.min}`;
+          if (v.max !== undefined && Number(val) > Number(v.max))
+            newErrors[field.id] = `Maximum value is ${v.max}`;
+        } else if (field.type !== "number") {
+          if (v.minLength !== undefined && val.length < Number(v.minLength))
+            newErrors[field.id] = `Minimum ${v.minLength} characters required`;
+          if (v.maxLength !== undefined && val.length > Number(v.maxLength))
+            newErrors[field.id] = `Maximum ${v.maxLength} characters allowed`;
+        }
+        if (v.pattern && typeof v.pattern === "string") {
+          try {
+            if (!new RegExp(v.pattern).test(val))
+              newErrors[field.id] = (v.patternMessage as string) ?? "Invalid format";
+          } catch { /* ignore bad regex */ }
+        }
+      }
     }
     return newErrors;
   };
 
   const handleSubmit = () => {
+    // Prevent duplicate submissions from the same anonymous browser session
+    if (form?.id && localStorage.getItem(`submitted_form_${form.id}`)) {
+      toast.error("You have already submitted this form.");
+      return;
+    }
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);

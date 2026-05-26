@@ -40,39 +40,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("cf_token");
-    const storedUser = localStorage.getItem("cf_user");
-    if (storedToken && storedUser) {
+    // Token is now in an httpOnly cookie — only restore non-sensitive user display info
+    const storedUser = localStorage.getItem("df_user");
+    if (storedUser) {
       try {
-        setToken(storedToken);
         setUser(JSON.parse(storedUser));
       } catch {
-        localStorage.removeItem("cf_token");
-        localStorage.removeItem("cf_user");
+        localStorage.removeItem("df_user");
       }
     }
     setIsLoading(false);
   }, []);
 
   const login = useCallback((newToken: string, newUser: User) => {
-    localStorage.setItem("cf_token", newToken);
-    localStorage.setItem("cf_user", JSON.stringify(newUser));
-    setToken(newToken);
+    // Token is stored as an httpOnly cookie by the server — don't keep it in localStorage
+    localStorage.setItem("df_user", JSON.stringify(newUser));
+    setToken(newToken); // Keep in memory only (for components that read it)
     setUser(newUser);
   }, []);
 
   const logout = useCallback(() => {
-    localStorage.removeItem("cf_token");
-    localStorage.removeItem("cf_user");
+    localStorage.removeItem("df_user");
     setToken(null);
     setUser(null);
+    // Clear the httpOnly cookie via the REST endpoint
+    const baseUrl =
+      (typeof window !== "undefined" && (process.env.NEXT_PUBLIC_API_URL?.replace("/trpc", "") ?? "http://localhost:8000")) ||
+      "http://localhost:8000";
+    fetch(`${baseUrl}/logout`, { method: "POST", credentials: "include" }).catch(() => {});
   }, []);
 
   const updateUser = useCallback((updates: Partial<User>) => {
     setUser((prev) => {
       if (!prev) return prev;
       const updated = { ...prev, ...updates };
-      localStorage.setItem("cf_user", JSON.stringify(updated));
+      localStorage.setItem("df_user", JSON.stringify(updated));
       return updated;
     });
   }, []);
