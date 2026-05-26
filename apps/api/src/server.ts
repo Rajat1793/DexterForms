@@ -113,13 +113,18 @@ app.get("/health", (_req, res) => {
 
 // REST logout — clears the httpOnly cookie. Used by the frontend auth provider.
 app.post("/logout", (_req, res) => {
-  res.clearCookie("df_token", { path: "/" });
+  const isProd = process.env.NODE_ENV !== "development";
+  res.clearCookie("df_token", { path: "/", secure: isProd, sameSite: isProd ? "none" : "lax" });
   return res.json({ success: true });
 });
 
 logger.debug(`OpenAPI JSON: ${env.BASE_URL}/openapi.json`);
-app.get("/openapi.json", (_req, res) => {
-  return res.json(openApiDocument);
+app.get("/openapi.json", (req, res) => {
+  // Derive the actual host from the request so the docs work regardless of BASE_URL
+  const proto = (req.headers["x-forwarded-proto"] as string) || req.protocol;
+  const host = (req.headers["x-forwarded-host"] as string) || req.get("host");
+  const serverUrl = `${proto}://${host}/api`;
+  return res.json({ ...openApiDocument, servers: [{ url: serverUrl }] });
 });
 
 logger.debug(`API Docs: ${env.BASE_URL}/docs`);

@@ -48,10 +48,11 @@ export const authRouter = router({
     .mutation(async ({ input, ctx }) => {
       try {
         const { user, token } = await userService.register(input);
+        const isProd = process.env.NODE_ENV !== "development";
         ctx.res.cookie("df_token", token, {
           httpOnly: true,
-          secure: process.env.NODE_ENV !== "development",
-          sameSite: "lax",
+          secure: isProd,
+          sameSite: isProd ? "none" : "lax",
           maxAge: 7 * 24 * 60 * 60 * 1000,
           path: "/",
         });
@@ -91,10 +92,11 @@ export const authRouter = router({
     .mutation(async ({ input, ctx }) => {
       try {
         const { user, token } = await userService.login(input);
+        const isProd = process.env.NODE_ENV !== "development";
         ctx.res.cookie("df_token", token, {
           httpOnly: true,
-          secure: process.env.NODE_ENV !== "development",
-          sameSite: "lax",
+          secure: isProd,
+          sameSite: isProd ? "none" : "lax",
           maxAge: 7 * 24 * 60 * 60 * 1000,
           path: "/",
         });
@@ -191,7 +193,8 @@ export const authRouter = router({
     .input(zodUndefinedModel)
     .output(z.object({ success: z.boolean() }))
     .mutation(async ({ ctx }) => {
-      ctx.res.clearCookie("df_token", { path: "/" });
+      const isProd = process.env.NODE_ENV !== "development";
+      ctx.res.clearCookie("df_token", { path: "/", secure: isProd, sameSite: isProd ? "none" : "lax" });
       return { success: true };
     }),
 });
