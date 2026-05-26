@@ -43,7 +43,8 @@ const corsOptions: cors.CorsOptions = {
 };
 
 // Respond to all OPTIONS preflight requests BEFORE rate limiters
-app.options("*", cors(corsOptions));
+// Express 5 uses path-to-regexp v8 which requires a named param or regex (bare "*" is invalid)
+app.options(/\/.*/, cors(corsOptions));
 app.use(cors(corsOptions));
 
 app.use(express.json({ limit: "2mb" }));
