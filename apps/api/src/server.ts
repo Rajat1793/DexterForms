@@ -18,21 +18,33 @@ export const app = express();
 app.set("trust proxy", 1);
 
 // CORS
-const allowedOrigins = [
-  env.FRONTEND_URL,
-  "http://localhost:3000",
-  "http://localhost:3001",
-  ...(env.CORS_ORIGINS ? env.CORS_ORIGINS.split(",").map((o) => o.trim()) : []),
-];
-
-app.use(
-  cors({
-    origin: allowedOrigins,
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
+const allowedOrigins = Array.from(
+  new Set([
+    env.FRONTEND_URL,
+    "http://localhost:3000",
+    "http://localhost:3001",
+    ...(env.CORS_ORIGINS ? env.CORS_ORIGINS.split(",").map((o) => o.trim()) : []),
+  ])
 );
+
+logger.info("CORS allowed origins", { allowedOrigins });
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    // Allow server-side / curl requests that have no Origin header
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    logger.warn(`CORS blocked origin: ${origin}`);
+    callback(null, false);
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
+
+// Respond to all OPTIONS preflight requests BEFORE rate limiters
+app.options("*", cors(corsOptions));
+app.use(cors(corsOptions));
 
 app.use(express.json({ limit: "2mb" }));
 app.use(cookieParser());

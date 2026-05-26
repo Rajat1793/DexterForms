@@ -24,7 +24,7 @@ services:
           name: dexterforms-db
           property: connectionString
       - key: BASE_URL
-        value: https://dexterforms-api-jsfp.onrender.com
+        value: https://dexterforms-api.onrender.com
       - key: FRONTEND_URL
         value: https://dexterforms-web.onrender.com
       - key: CORS_ORIGINS
@@ -64,6 +64,6 @@ services:
       - key: NODE_ENV
         value: production
       - key: NEXT_PUBLIC_API_URL
-        value: https://dexterforms-api-jsfp.onrender.com/trpc
+        value: https://dexterforms-api.onrender.com/trpc
       - key: NEXT_PUBLIC_APP_URL
         value: https://dexterforms-web.onrender.com
