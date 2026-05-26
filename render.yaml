@@ -12,7 +12,7 @@ services:
     plan: free
     rootDir: .
     buildCommand: npm install -g pnpm@9 turbo && NODE_ENV=development pnpm install --frozen-lockfile && turbo build --filter=@repo/api
-    startCommand: pnpm --filter=@repo/database exec drizzle-kit migrate && node apps/api/dist/index.js
+    startCommand: pnpm --filter=@repo/database exec drizzle-kit migrate && pnpm --filter=@repo/database run db:seed:prod && node apps/api/dist/index.js
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
