@@ -1,4 +1,5 @@
 import { httpLink, httpBatchStreamLink } from "@repo/trpc/client";
+import { tokenStore } from "~/lib/token-store";
 
 const API_URL =
   typeof window !== "undefined"
@@ -16,10 +17,17 @@ export const createTRPCHttpBatchClientClient = (
   return c({
     url: API_URL,
     fetch(url, options) {
-      // Credentials: "include" sends the httpOnly df_token cookie automatically
+      // Send cookie (httpOnly df_token) AND Authorization header as a fallback.
+      // The header is needed when cross-origin SameSite/third-party cookie restrictions
+      // prevent the browser from sending the cookie automatically.
+      const token = tokenStore.get();
       return fetch(url, {
         ...options,
         credentials: "include",
+        headers: {
+          ...(options?.headers as Record<string, string> | undefined),
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
       });
     },
   });

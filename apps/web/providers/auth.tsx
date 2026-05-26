@@ -7,6 +7,7 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
+import { tokenStore } from "~/lib/token-store";
 
 interface User {
   id: string;
@@ -42,24 +43,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Token is now in an httpOnly cookie — only restore non-sensitive user display info
     const storedUser = localStorage.getItem("df_user");
+    const storedToken = tokenStore.get(); // restore from sessionStorage if available
     if (storedUser) {
       try {
         setUser(JSON.parse(storedUser));
+        if (storedToken) setToken(storedToken);
       } catch {
         localStorage.removeItem("df_user");
+        tokenStore.set(null);
       }
     }
     setIsLoading(false);
   }, []);
 
   const login = useCallback((newToken: string, newUser: User) => {
-    // Token is stored as an httpOnly cookie by the server — don't keep it in localStorage
+    // Store token in sessionStorage via tokenStore so tRPC client can send it as Authorization header
+    tokenStore.set(newToken);
     localStorage.setItem("df_user", JSON.stringify(newUser));
-    setToken(newToken); // Keep in memory only (for components that read it)
+    setToken(newToken);
     setUser(newUser);
   }, []);
 
   const logout = useCallback(() => {
+    tokenStore.set(null);
     localStorage.removeItem("df_user");
     setToken(null);
     setUser(null);

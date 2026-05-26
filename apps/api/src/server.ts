@@ -120,9 +120,9 @@ app.post("/logout", (_req, res) => {
 
 logger.debug(`OpenAPI JSON: ${env.BASE_URL}/openapi.json`);
 app.get("/openapi.json", (req, res) => {
-  // Derive the actual host from the request so the docs work regardless of BASE_URL
-  const proto = (req.headers["x-forwarded-proto"] as string) || req.protocol;
-  const host = (req.headers["x-forwarded-host"] as string) || req.get("host");
+  // req.hostname respects x-forwarded-host when trust proxy is set
+  const proto = (req.headers["x-forwarded-proto"] as string)?.split(",")[0]?.trim() ?? req.protocol;
+  const host = req.hostname; // populated from x-forwarded-host with trust proxy: 1
   const serverUrl = `${proto}://${host}/api`;
   return res.json({ ...openApiDocument, servers: [{ url: serverUrl }] });
 });

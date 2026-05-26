@@ -98,7 +98,7 @@ export default function LandingPage() {
           <Link href="/"><Image src="/dexterlogo.png" alt="DexterForms" height={40} width={160} style={{ height: "auto" }} className="object-contain" priority /></Link>
           <div className="hidden md:flex items-center gap-6">
             <Link href="/pricing" className="font-bold text-[#1a1a1a] hover:text-[#cc0000] uppercase text-sm tracking-wide">Pricing</Link>
-            <Link href="http://localhost:8000/docs" target="_blank" className="font-bold text-[#1a1a1a] hover:text-[#cc0000] uppercase text-sm tracking-wide">API Docs</Link>
+            <Link href="https://dexterforms-api.onrender.com/docs" target="_blank" className="font-bold text-[#1a1a1a] hover:text-[#cc0000] uppercase text-sm tracking-wide">API Docs</Link>
           </div>
           <div className="flex items-center gap-3">
             {user ? (
@@ -277,7 +277,7 @@ export default function LandingPage() {
           </div>
           <div className="flex items-center gap-6 text-xs text-[#888]">
             <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
-            <Link href="http://localhost:8000/docs" target="_blank" className="hover:text-white transition-colors">API Docs</Link>
+            <Link href="https://dexterforms-api.onrender.com/docs" target="_blank" className="hover:text-white transition-colors">API Docs</Link>
             <Link href="/auth/login" className="hover:text-white transition-colors">Login</Link>
             <Link href="/auth/register" className="hover:text-white transition-colors">Register</Link>
           </div>
