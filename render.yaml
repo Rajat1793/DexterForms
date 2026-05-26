@@ -11,7 +11,7 @@ services:
     runtime: node
     plan: free
     rootDir: .
-    buildCommand: npm install -g pnpm@9 turbo && pnpm install --frozen-lockfile && turbo build --filter=@repo/api
+    buildCommand: npm install -g pnpm@9 turbo && NODE_ENV=development pnpm install --frozen-lockfile && turbo build --filter=@repo/api
     startCommand: pnpm --filter=@repo/database exec drizzle-kit migrate && node apps/api/dist/index.js
     healthCheckPath: /health
     envVars:
@@ -56,7 +56,7 @@ services:
     runtime: node
     plan: free
     rootDir: .
-    buildCommand: npm install -g pnpm@9 turbo && pnpm install --frozen-lockfile && turbo build --filter=web
+    buildCommand: npm install -g pnpm@9 turbo && NODE_ENV=development pnpm install --frozen-lockfile && turbo build --filter=web
     startCommand: pnpm --filter=web start
     envVars:
       - key: NODE_ENV
@@ -65,5 +65,3 @@ services:
         sync: false          # set to https://<chaiforms-api>.onrender.com/trpc
       - key: NEXT_PUBLIC_APP_URL
         sync: false          # set to https://<chaiforms-web>.onrender.com
-      - key: SKIP_ENV_VALIDATION
-        value: false
