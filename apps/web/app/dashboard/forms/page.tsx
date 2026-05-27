@@ -6,12 +6,13 @@ import { ConfirmModal } from "~/components/ui/confirm-modal";
 import { NewFormButton } from "~/components/ui/new-form-button";
 import { trpc } from "~/trpc/client";
 import { toast } from "sonner";
-import { Search, MoreVertical, Eye, Copy, BarChart2, Trash2, FileText } from "lucide-react";
+import { Search, MoreVertical, Eye, Copy, BarChart2, Trash2, FileText, Archive, ArchiveRestore } from "lucide-react";
 
 const STATUS_BADGE: Record<string, string> = {
   published: "badge-published",
   draft: "badge-draft",
   closed: "badge-closed",
+  archived: "badge-archived",
 };
 const CARD_COLORS = ["bg-[#cc0000]","bg-[#1565c0]","bg-[#00a86b]","bg-[#ff8c00]","bg-[#7b1fa2]","bg-[#ff69b4]"];
 
@@ -41,10 +42,20 @@ export default function FormsPage() {
     onSuccess: (form) => { toast.success("Form duplicated"); router.push(`/dashboard/forms/${form.id}`); },
     onError: (e) => toast.error(e.message),
   });
+  const archiveMutation = trpc.forms.archive.useMutation({
+    onSuccess: () => { toast.success("Form archived"); refetch(); },
+    onError: (e) => toast.error(e.message),
+  });
+  const unarchiveMutation = trpc.forms.unarchive.useMutation({
+    onSuccess: () => { toast.success("Form restored from archive"); refetch(); },
+    onError: (e) => toast.error(e.message),
+  });
 
   const filtered = (forms ?? []).filter((f) => {
     const matchesSearch = f.title.toLowerCase().includes(search.toLowerCase());
-    const matchesStatus = statusFilter === "all" || f.status === statusFilter;
+    const matchesStatus =
+      statusFilter === "all" ? f.status !== "archived" :
+      f.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -73,7 +84,7 @@ export default function FormsPage() {
             style={{ border:"3px solid #000", boxShadow:"3px 3px 0 #000" }} />
         </div>
         <div className="flex gap-2">
-          {["all","published","draft","closed"].map((s) => (
+          {["all","published","draft","closed","archived"].map((s) => (
             <button key={s} onClick={() => setStatusFilter(s)}
               className="px-3 py-2 font-bangers text-base uppercase tracking-wider transition-all"
               style={statusFilter === s
@@ -126,16 +137,33 @@ export default function FormsPage() {
                     className="flex-1 cartoon-btn bg-[#1565c0] text-white font-bangers text-sm py-1.5 tracking-wider">
                     EDIT
                   </button>
-                  {form.slug && (
+                  {form.slug && form.status !== "archived" && (
                     <button onClick={() => window.open(`/f/${form.slug}`, "_blank")}
                       className="cartoon-btn bg-white text-[#1a1a1a] font-bangers text-sm py-1.5 px-3 tracking-wider">
                       <Eye className="h-4 w-4" />
                     </button>
                   )}
-                  <button onClick={() => router.push(`/dashboard/forms/${form.id}/analytics`)}
-                    className="cartoon-btn bg-white text-[#1a1a1a] font-bangers text-sm py-1.5 px-3 tracking-wider">
-                    <BarChart2 className="h-4 w-4" />
-                  </button>
+                  {form.status !== "archived" && (
+                    <button onClick={() => router.push(`/dashboard/forms/${form.id}/analytics`)}
+                      className="cartoon-btn bg-white text-[#1a1a1a] font-bangers text-sm py-1.5 px-3 tracking-wider">
+                      <BarChart2 className="h-4 w-4" />
+                    </button>
+                  )}
+                  {form.status !== "archived" ? (
+                    <button
+                      onClick={() => archiveMutation.mutate({ id: form.id })}
+                      title="Archive form"
+                      className="cartoon-btn bg-[#ff8c00] text-white font-bangers text-sm py-1.5 px-3 tracking-wider">
+                      <Archive className="h-4 w-4" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => unarchiveMutation.mutate({ id: form.id })}
+                      title="Restore from archive"
+                      className="cartoon-btn bg-[#00a86b] text-white font-bangers text-sm py-1.5 px-3 tracking-wider">
+                      <ArchiveRestore className="h-4 w-4" />
+                    </button>
+                  )}
                   <button onClick={() => setPendingDeleteId(form.id)}
                     className="cartoon-btn bg-[#cc0000] text-white font-bangers text-sm py-1.5 px-3 tracking-wider">
                     <Trash2 className="h-4 w-4" />

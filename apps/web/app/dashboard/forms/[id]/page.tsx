@@ -66,6 +66,17 @@ const THEMES = [
   { id: "dexter", name: "Dexter's Lab", emoji: "🧪" },
 ];
 
+const CONDITION_OPERATORS = [
+  { value: "eq", label: "equals" },
+  { value: "neq", label: "does not equal" },
+  { value: "contains", label: "contains" },
+  { value: "is_empty", label: "is empty" },
+  { value: "is_not_empty", label: "is not empty" },
+];
+
+type ConditionalRule = { fieldId: string; operator: string; value: string };
+type ConditionalLogic = { showIf: ConditionalRule[] };
+
 type Field = {
   id: string;
   formId: string;
@@ -165,13 +176,34 @@ function SortableField({
 
 function FieldEditor({
   field,
+  allFields,
   onUpdate,
 }: {
   field: Field;
+  allFields: Field[];
   onUpdate: (data: Partial<Field>) => void;
 }) {
   const hasOptions = ["single_select", "multi_select", "dropdown"].includes(field.type);
   const options = (field.options as Array<{ value: string; label: string }>) ?? [];
+
+  const logic: ConditionalLogic = (field.conditionalLogic as ConditionalLogic | null) ?? { showIf: [] };
+  const otherFields = allFields.filter((f) => f.id !== field.id);
+
+  const addRule = () => {
+    if (otherFields.length === 0) return;
+    const newRule: ConditionalRule = { fieldId: otherFields[0]!.id, operator: "eq", value: "" };
+    onUpdate({ conditionalLogic: { showIf: [...logic.showIf, newRule] } });
+  };
+
+  const updateRule = (idx: number, changes: Partial<ConditionalRule>) => {
+    const updated = [...logic.showIf];
+    updated[idx] = { ...updated[idx]!, ...changes };
+    onUpdate({ conditionalLogic: { showIf: updated } });
+  };
+
+  const removeRule = (idx: number) => {
+    onUpdate({ conditionalLogic: { showIf: logic.showIf.filter((_, i) => i !== idx) } });
+  };
 
   const addOption = () => {
     const newOption = { value: `option_${options.length + 1}`, label: `Option ${options.length + 1}` };
@@ -279,6 +311,74 @@ function FieldEditor({
           </select>
         </div>
       )}
+
+      {/* Conditional Logic */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-xs font-black text-[#1a1a1a] uppercase tracking-wide">Conditional Logic</label>
+          {otherFields.length > 0 && (
+            <button
+              onClick={addRule}
+              className="flex items-center gap-1 text-xs text-[#cc0000] font-black hover:text-[#aa0000] tracking-wider uppercase"
+            >
+              <Plus className="h-3 w-3" />
+              ADD
+            </button>
+          )}
+        </div>
+        {otherFields.length === 0 ? (
+          <p className="text-xs text-[#888] font-mono">Add more fields to enable conditional logic.</p>
+        ) : logic.showIf.length === 0 ? (
+          <p className="text-xs text-[#888] font-mono">Always visible. Click ADD to add a show condition.</p>
+        ) : (
+          <div className="space-y-2">
+            <p className="text-xs text-[#555] font-mono">Show if ALL match:</p>
+            {logic.showIf.map((rule, idx) => {
+              const needsValue = !["is_empty", "is_not_empty"].includes(rule.operator);
+              return (
+                <div key={idx} className="border border-[#ddd] p-2 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-[#555] uppercase tracking-wider">Rule {idx + 1}</span>
+                    <button onClick={() => removeRule(idx)} className="text-[#888] hover:text-[#cc0000]">
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                  <select
+                    value={rule.fieldId}
+                    onChange={(e) => updateRule(idx, { fieldId: e.target.value })}
+                    className="w-full px-2 py-1.5 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none"
+                    style={{ border: "2px solid #000" }}
+                  >
+                    {otherFields.map((f) => (
+                      <option key={f.id} value={f.id}>{f.label}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={rule.operator}
+                    onChange={(e) => updateRule(idx, { operator: e.target.value })}
+                    className="w-full px-2 py-1.5 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none"
+                    style={{ border: "2px solid #000" }}
+                  >
+                    {CONDITION_OPERATORS.map((op) => (
+                      <option key={op.value} value={op.value}>{op.label}</option>
+                    ))}
+                  </select>
+                  {needsValue && (
+                    <input
+                      type="text"
+                      value={rule.value}
+                      onChange={(e) => updateRule(idx, { value: e.target.value })}
+                      className="w-full px-2 py-1.5 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none"
+                      style={{ border: "2px solid #000" }}
+                      placeholder="Value to compare"
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
@@ -292,6 +392,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
   const [showFieldPicker, setShowFieldPicker] = useState(false);
   const [pendingDeleteFieldId, setPendingDeleteFieldId] = useState<string | null>(null);
+  const [formPassword, setFormPassword] = useState("");
 
   const { data: form, isLoading: formLoading } = trpc.forms.getById.useQuery({ id: formId });
   const { data: fields = [], isLoading: fieldsLoading } = trpc.fields.getByForm.useQuery({ formId });
@@ -685,6 +786,54 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
                     <span className={`absolute top-0.5 h-4 w-4 bg-white shadow transition-transform ${(form as any).notifyOnResponse ? "translate-x-4" : "translate-x-0.5"}`} />
                   </button>
                 </div>
+
+                {/* Password Protection */}
+                <div className="border border-[#ddd] p-3 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-black text-[#888] uppercase tracking-widest">&gt; Password Protection</span>
+                      <p className="text-xs text-[#888] font-mono mt-0.5">Require a password to fill this form</p>
+                    </div>
+                    <button
+                      onClick={() => updateFormMutation.mutate({
+                        id: formId,
+                        requiresPassword: !(form as any).requiresPassword,
+                        ...( (form as any).requiresPassword ? { password: "" } : {} ),
+                      })}
+                      className={`relative h-5 w-9 transition-colors flex-shrink-0 ${ (form as any).requiresPassword ? "bg-[#1565c0]" : "bg-[#e0e0e0]"}`}
+                    >
+                      <span className={`absolute top-0.5 h-4 w-4 bg-white shadow transition-transform ${ (form as any).requiresPassword ? "translate-x-4" : "translate-x-0.5"}`} />
+                    </button>
+                  </div>
+                  {(form as any).requiresPassword && (
+                    <div>
+                      <label className="block text-xs font-black text-[#888] uppercase tracking-widest mb-1.5">&gt; Set Password</label>
+                      <div className="flex gap-2">
+                        <input
+                          type="password"
+                          value={formPassword}
+                          onChange={(e) => setFormPassword(e.target.value)}
+                          className="flex-1 px-3 py-2 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none focus:ring-2 focus:ring-[#1565c0]"
+                          style={{ border: "2px solid #000", boxShadow: "2px 2px 0 #000" }}
+                          placeholder="New password..."
+                        />
+                        <button
+                          onClick={() => {
+                            if (!formPassword) return;
+                            updateFormMutation.mutate({ id: formId, requiresPassword: true, password: formPassword });
+                            setFormPassword("");
+                          }}
+                          disabled={!formPassword}
+                          className="px-3 py-2 text-xs font-black text-white bg-[#1565c0] disabled:opacity-40 hover:bg-[#0d47a1] transition-colors"
+                          style={{ border: "2px solid #000" }}
+                        >
+                          <Check className="h-4 w-4" />
+                        </button>
+                      </div>
+                      <p className="text-xs text-[#888] font-mono mt-1.5">Password is hashed &amp; stored securely. Leave blank to keep current.</p>
+                    </div>
+                  )}
+                </div>
                 {isPublished && form.slug && (
                   <div className="p-4" style={{ border:"2px solid #00a86b", background:"#e8f5e9" }}>
                     <p className="text-xs font-bangers text-[#00a86b] mb-2 tracking-widest">● PUBLISHED!</p>
@@ -791,6 +940,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
             <div className="p-4">
               <FieldEditor
                 field={selectedField}
+                allFields={fields as Field[]}
                 onUpdate={(data) => handleUpdateField(selectedField.id, data)}
               />
             </div>

@@ -1,7 +1,8 @@
 import { db } from "@repo/database";
 import { formsTable, formFieldsTable } from "@repo/database/schema";
-import { eq, and, desc, count, sql } from "@repo/database";
+import { eq, and, ne, desc, count, sql } from "@repo/database";
 import { InsertForm, InsertFormField } from "@repo/database/schema";
+import { hashPassword } from "../auth";
 
 function generateSlug(title: string): string {
   return (
@@ -62,10 +63,36 @@ class FormService {
     return form ?? null;
   }
 
-  async updateForm(id: string, creatorId: string, data: Partial<InsertForm>) {
+  async updateForm(id: string, creatorId: string, data: Partial<InsertForm>, plainPassword?: string) {
+    const updateData: Partial<InsertForm> = { ...data };
+    if (plainPassword !== undefined) {
+      if (plainPassword) {
+        updateData.passwordHash = await hashPassword(plainPassword);
+      } else {
+        updateData.passwordHash = null;
+      }
+    }
     const [form] = await db
       .update(formsTable)
-      .set({ ...data })
+      .set(updateData)
+      .where(and(eq(formsTable.id, id), eq(formsTable.creatorId, creatorId)))
+      .returning();
+    return form ?? null;
+  }
+
+  async archiveForm(id: string, creatorId: string) {
+    const [form] = await db
+      .update(formsTable)
+      .set({ status: "archived" })
+      .where(and(eq(formsTable.id, id), eq(formsTable.creatorId, creatorId)))
+      .returning();
+    return form ?? null;
+  }
+
+  async unarchiveForm(id: string, creatorId: string) {
+    const [form] = await db
+      .update(formsTable)
+      .set({ status: "draft" })
       .where(and(eq(formsTable.id, id), eq(formsTable.creatorId, creatorId)))
       .returning();
     return form ?? null;
@@ -197,7 +224,7 @@ class FormService {
     const forms = await db
       .select({ count: count() })
       .from(formsTable)
-      .where(eq(formsTable.creatorId, creatorId));
+      .where(and(eq(formsTable.creatorId, creatorId), ne(formsTable.status, "archived")));
 
     const published = await db
       .select({ count: count() })
@@ -209,7 +236,7 @@ class FormService {
     const totalResponses = await db
       .select({ total: sql<number>`sum(${formsTable.responseCount})` })
       .from(formsTable)
-      .where(eq(formsTable.creatorId, creatorId));
+      .where(and(eq(formsTable.creatorId, creatorId), ne(formsTable.status, "archived")));
 
     return {
       totalForms: Number(forms[0]?.count ?? 0),

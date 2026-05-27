@@ -4,7 +4,7 @@ import { use, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { trpc } from "~/trpc/client";
 import { toast } from "sonner";
-import { Loader2, Star, Check, AlertCircle } from "lucide-react";
+import { Loader2, Star, Check, AlertCircle, Lock } from "lucide-react";
 import { MascotStickers, RandomMascot } from "~/components/ui/mascot-stickers";
 
 type FormField = {
@@ -12,6 +12,25 @@ type FormField = {
   description: string | null; required: boolean | null; order: number;
   options: unknown; settings: unknown; validations: unknown; conditionalLogic: unknown;
 };
+
+type ConditionalRule = { fieldId: string; operator: string; value: string };
+type ConditionalLogic = { showIf: ConditionalRule[] };
+
+function evaluateConditions(field: FormField, answers: Record<string, string>): boolean {
+  const logic = field.conditionalLogic as ConditionalLogic | null | undefined;
+  if (!logic?.showIf?.length) return true;
+  return logic.showIf.every((rule) => {
+    const answer = answers[rule.fieldId] ?? "";
+    switch (rule.operator) {
+      case "eq": return answer === rule.value;
+      case "neq": return answer !== rule.value;
+      case "contains": return answer.toLowerCase().includes(rule.value.toLowerCase());
+      case "is_empty": return !answer || answer === "[]" || answer === "false";
+      case "is_not_empty": return !!answer && answer !== "[]" && answer !== "false";
+      default: return true;
+    }
+  });
+}
 
 function getTheme(themeId: string | null) {
   const ACCENT_COLORS: Record<string, string> = {
@@ -192,8 +211,23 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
   const startTimeRef = useRef(Date.now());
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [passwordUnlocked, setPasswordUnlocked] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   const { data: form, isLoading, error } = trpc.public.getFormBySlug.useQuery({ slug });
+
+  const verifyPasswordMutation = trpc.public.verifyFormPassword.useMutation({
+    onSuccess: (data) => {
+      if (data.valid) {
+        setPasswordUnlocked(true);
+        setPasswordError("");
+      } else {
+        setPasswordError("Incorrect password. Please try again.");
+      }
+    },
+    onError: (e) => setPasswordError(e.message),
+  });
 
   const submitMutation = trpc.public.submitResponse.useMutation({
     onSuccess: () => {
@@ -213,7 +247,7 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    for (const field of form?.fields ?? []) {
+    for (const field of visibleFields) {
       const val = answers[field.id];
 
       if (field.required) {
@@ -334,14 +368,59 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
   }
 
   const fields = form.fields ?? [];
-  const totalFields = fields.length;
-  const answeredFields = Object.keys(answers).filter((k) => answers[k] && answers[k] !== "[]" && answers[k] !== "false").length;
+  const visibleFields = fields.filter((f) => evaluateConditions(f, answers));
+  const totalFields = visibleFields.length;
+  const answeredFields = visibleFields.filter((f) => {
+    const v = answers[f.id];
+    return v && v !== "[]" && v !== "false";
+  }).length;
   const progressPercent = totalFields > 0 ? Math.round((answeredFields / totalFields) * 100) : 0;
 
   return (
     <div className="relative min-h-screen bg-polka-yellow py-10 px-4 overflow-x-hidden">
       <MascotStickers count={3} />
       <div className="checker-strip fixed top-0 left-0 right-0 z-10" />
+
+      {/* Password Gate */}
+      {form.requiresPassword && !passwordUnlocked && (
+        <div className="fixed inset-0 bg-polka-yellow flex items-center justify-center z-50 px-4">
+          <div className="checker-strip fixed top-0 left-0 right-0 z-10" />
+          <div className="cartoon-card bg-white p-8 max-w-sm w-full text-center">
+            <div className="text-5xl mb-4">🔒</div>
+            <h2 className="font-bangers text-2xl text-[#1a1a1a] tracking-wide mb-2">PASSWORD REQUIRED!</h2>
+            <p className="text-[#555] text-sm font-bold mb-6">This form is password protected. Enter the password to access it.</p>
+            <input
+              type="password"
+              value={passwordInput}
+              onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(""); }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && passwordInput)
+                  verifyPasswordMutation.mutate({ slug, password: passwordInput });
+              }}
+              className="w-full px-4 py-3 text-sm font-bold text-[#1a1a1a] bg-white focus:outline-none mb-3"
+              style={{ border: "3px solid #000", boxShadow: "2px 2px 0 #000" }}
+              placeholder="Enter password..."
+              autoFocus
+            />
+            {passwordError && (
+              <p className="text-xs text-[#cc0000] font-bold mb-3">⚠️ {passwordError}</p>
+            )}
+            <button
+              onClick={() => verifyPasswordMutation.mutate({ slug, password: passwordInput })}
+              disabled={!passwordInput || verifyPasswordMutation.isPending}
+              className="cartoon-btn w-full font-bangers text-xl tracking-wider py-3 text-white flex items-center justify-center gap-2 disabled:opacity-60"
+              style={{ background: accentColor }}
+            >
+              {verifyPasswordMutation.isPending ? (
+                <><Loader2 className="h-5 w-5 animate-spin" /> CHECKING...</>
+              ) : (
+                <><Lock className="h-5 w-5" /> UNLOCK!</>
+              )}
+            </button>
+          </div>
+          <div className="checker-strip fixed bottom-0 left-0 right-0 z-10" />
+        </div>
+      )}
 
       <div className="max-w-2xl mx-auto pt-6 pb-16">
         {/* Form header card */}
@@ -377,7 +456,7 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
 
         {/* Fields */}
         <div className="space-y-4">
-          {fields.map((field, idx) => (
+          {visibleFields.map((field, idx) => (
             <div key={field.id} className="cartoon-card bg-white overflow-hidden">
               <div className="h-1" style={{ background: accentColor }} />
               <div className="p-6">
@@ -411,7 +490,7 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
         </div>
 
         {/* Submit */}
-        {fields.length > 0 && (
+        {visibleFields.length > 0 && (
           <div className="mt-6">
             <button onClick={handleSubmit} disabled={submitMutation.isPending}
               className="cartoon-btn w-full font-bangers text-2xl tracking-wider py-4 flex items-center justify-center gap-2 text-white disabled:opacity-60"
@@ -423,7 +502,7 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
           </div>
         )}
 
-        {fields.length === 0 && (
+        {visibleFields.length === 0 && (
           <div className="cartoon-card bg-white p-12 text-center">
             <p className="font-bold text-[#888] text-sm">This form has no fields yet.</p>
           </div>

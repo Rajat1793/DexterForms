@@ -254,6 +254,15 @@
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
+.badge-archived {
+  background: #ff8c00;
+  color: white;
+  border: 2px solid #000000;
+  box-shadow: 2px 2px 0 #000000;
+  font-family: var(--font-bangers, cursive);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
 
 /* Diagonal section divider (checkerboard strip) */
 .checker-strip {

@@ -79,12 +79,14 @@ export const formsRouter = router({
         redirectUrl: z.string().nullable().optional(),
         showProgressBar: z.boolean().optional(),
         notifyOnResponse: z.boolean().optional(),
+        requiresPassword: z.boolean().optional(),
+        password: z.string().optional(),
       })
     )
     .output(formOutputSchema)
     .mutation(async ({ ctx, input }) => {
-      const { id, ...data } = input;
-      const form = await formService.updateForm(id, ctx.user.userId, data as any);
+      const { id, password, ...data } = input;
+      const form = await formService.updateForm(id, ctx.user.userId, data as any, password);
       if (!form) throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
       return form;
     }),
@@ -148,6 +150,26 @@ export const formsRouter = router({
     .output(formOutputSchema)
     .mutation(async ({ ctx, input }) => {
       const form = await formService.duplicateForm(input.id, ctx.user.userId);
+      if (!form) throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
+      return form;
+    }),
+
+  archive: protectedProcedure
+    .meta({ openapi: { method: "POST", path: getPath("/{id}/archive"), tags: TAGS } })
+    .input(z.object({ id: z.string() }))
+    .output(formOutputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const form = await formService.archiveForm(input.id, ctx.user.userId);
+      if (!form) throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
+      return form;
+    }),
+
+  unarchive: protectedProcedure
+    .meta({ openapi: { method: "POST", path: getPath("/{id}/unarchive"), tags: TAGS } })
+    .input(z.object({ id: z.string() }))
+    .output(formOutputSchema)
+    .mutation(async ({ ctx, input }) => {
+      const form = await formService.unarchiveForm(input.id, ctx.user.userId);
       if (!form) throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
       return form;
     }),

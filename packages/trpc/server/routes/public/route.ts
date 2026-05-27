@@ -4,11 +4,25 @@ import { publicProcedure, router } from "../../trpc";
 import { generatePath } from "../../utils/path-generator";
 import { TRPCError } from "@trpc/server";
 import { sendNewResponseNotification } from "@repo/services/email";
+import { comparePassword } from "@repo/services/auth";
 
 const TAGS = ["Public"];
 const getPath = generatePath("/public");
 
 export const publicRouter = router({
+  verifyFormPassword: publicProcedure
+    .meta({
+      openapi: { method: "POST", path: getPath("/forms/{slug}/verify-password"), tags: TAGS },
+    })
+    .input(z.object({ slug: z.string(), password: z.string() }))
+    .output(z.object({ valid: z.boolean() }))
+    .mutation(async ({ input }) => {
+      const form = await formService.getFormBySlug(input.slug);
+      if (!form || !form.passwordHash) return { valid: false };
+      const valid = await comparePassword(input.password, form.passwordHash);
+      return { valid };
+    }),
+
   getFormBySlug: publicProcedure
     .meta({
       openapi: {
