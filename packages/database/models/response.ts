@@ -28,6 +28,8 @@ export const responsesTable = pgTable("responses", {
 
   metadata: jsonb("metadata"),
 
+  readAt: timestamp("read_at"),
+
   createdAt: timestamp("created_at").defaultNow(),
 });
 

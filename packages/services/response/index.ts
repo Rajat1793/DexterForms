@@ -221,6 +221,23 @@ class ResponseService {
   async deleteResponse(responseId: string) {
     await db.delete(responsesTable).where(eq(responsesTable.id, responseId));
   }
+
+  async markAsRead(responseId: string) {
+    const [updated] = await db
+      .update(responsesTable)
+      .set({ readAt: new Date() })
+      .where(and(eq(responsesTable.id, responseId), sql`${responsesTable.readAt} IS NULL`))
+      .returning();
+    return updated;
+  }
+
+  async getUnreadCount(formId: string) {
+    const [result] = await db
+      .select({ count: count() })
+      .from(responsesTable)
+      .where(and(eq(responsesTable.formId, formId), sql`${responsesTable.readAt} IS NULL`));
+    return Number(result?.count ?? 0);
+  }
 }
 
 export default ResponseService;

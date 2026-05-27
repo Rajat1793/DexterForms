@@ -4,7 +4,7 @@ import { use, useState } from "react";
 import Link from "next/link";
 import { ConfirmModal } from "~/components/ui/confirm-modal";
 import { trpc } from "~/trpc/client";
-import { ArrowLeft, Download, Trash2, Eye, Mail, Clock } from "lucide-react";
+import { ArrowLeft, Download, Trash2, Eye, Mail, Clock, Circle, CheckCircle2 } from "lucide-react";
 import { formatDistanceToNow, format } from "date-fns";
 import { toast } from "sonner";
 
@@ -34,6 +34,15 @@ export default function ResponsesPage({ params }: { params: Promise<{ id: string
     },
     onError: (e) => toast.error(e.message),
   });
+
+  const markAsReadMutation = trpc.responses.markAsRead.useMutation({
+    onSuccess: () => {
+      utils.responses.getByForm.invalidate({ formId });
+      utils.responses.unreadCount.invalidate({ formId });
+    },
+  });
+
+  const { data: unreadData } = trpc.responses.unreadCount.useQuery({ formId });
 
   const exportCSV = () => {
     if (!allData || allData.length === 0) {
@@ -84,7 +93,7 @@ export default function ResponsesPage({ params }: { params: Promise<{ id: string
               </Link>
               <div>
                 <h1 className="font-bangers text-xl text-[#1a1a1a] tracking-widest uppercase">{form?.title ?? "Responses"}</h1>
-                <p className="text-xs text-[#555] font-mono">{total} total entries</p>
+                <p className="text-xs text-[#555] font-mono">{total} total entries{unreadData && unreadData.count > 0 ? ` · ` : ""}{unreadData && unreadData.count > 0 && <span className="font-black text-[#cc0000]">{unreadData.count} unread</span>}</p>
               </div>
             </div>
             <button
@@ -119,18 +128,24 @@ export default function ResponsesPage({ params }: { params: Promise<{ id: string
               {responses.map((r: any, idx: number) => (
                 <div
                   key={r.id}
-                  onClick={() => setSelectedResponse(r.id)}
+                  onClick={() => {
+                    setSelectedResponse(r.id);
+                    if (!r.readAt) markAsReadMutation.mutate({ formId, responseId: r.id });
+                  }}
                   className={`flex items-center gap-4 px-6 py-4 cursor-pointer hover:bg-[#fffde7] transition-colors ${
-                    selectedResponse === r.id ? "bg-[#fff9c4] border-l-[3px] border-[#cc0000]" : ""
+                    selectedResponse === r.id ? "bg-[#fff9c4] border-l-[3px] border-[#cc0000]" : !r.readAt ? "bg-[#fff3e0] border-l-[3px] border-[#ff9800]" : ""
                   }`}
                 >
                   <div className="h-9 w-9 border border-[#ccc] bg-[#fff9c4] flex items-center justify-center text-[#cc0000] text-xs font-black flex-shrink-0 font-mono">
                     {String(idx + 1).padStart(2, "0")}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-black text-[#1a1a1a] truncate tracking-wide">
-                      {r.respondentName ?? r.respondentEmail ?? `RESPONSE #${idx + 1}`}
-                    </p>
+                    <div className="flex items-center gap-1.5">
+                      {!r.readAt && <Circle className="h-2 w-2 fill-[#ff9800] text-[#ff9800] flex-shrink-0" />}
+                      <p className={`text-xs font-black text-[#1a1a1a] truncate tracking-wide ${!r.readAt ? "text-[#1a1a1a]" : "text-[#555]"}`}>
+                        {r.respondentName ?? r.respondentEmail ?? `RESPONSE #${idx + 1}`}
+                      </p>
+                    </div>
                     {r.respondentEmail && (
                       <p className="text-xs text-[#555] truncate font-mono">{r.respondentEmail}</p>
                     )}

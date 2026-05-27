@@ -16,6 +16,7 @@ const responseOutputSchema = z.object({
   userAgent: z.string().nullable(),
   completionTime: z.number().nullable(),
   metadata: z.any().nullable(),
+  readAt: z.date().nullable(),
   createdAt: z.date().nullable(),
 });
 
@@ -122,5 +123,39 @@ export const responsesRouter = router({
       const form = await formService.getFormById(input.formId, ctx.user.userId);
       if (!form) throw new TRPCError({ code: "NOT_FOUND" });
       return responseService.getFormAnalytics(input.formId);
+    }),
+
+  markAsRead: protectedProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: getPath("/{formId}/responses/{responseId}/read"),
+        tags: TAGS,
+      },
+    })
+    .input(z.object({ formId: z.string(), responseId: z.string() }))
+    .output(z.object({ success: z.boolean() }))
+    .mutation(async ({ ctx, input }) => {
+      const form = await formService.getFormById(input.formId, ctx.user.userId);
+      if (!form) throw new TRPCError({ code: "NOT_FOUND" });
+      await responseService.markAsRead(input.responseId);
+      return { success: true };
+    }),
+
+  unreadCount: protectedProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: getPath("/{formId}/responses/unread-count"),
+        tags: TAGS,
+      },
+    })
+    .input(z.object({ formId: z.string() }))
+    .output(z.object({ count: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const form = await formService.getFormById(input.formId, ctx.user.userId);
+      if (!form) throw new TRPCError({ code: "NOT_FOUND" });
+      const count = await responseService.getUnreadCount(input.formId);
+      return { count };
     }),
 });

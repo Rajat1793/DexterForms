@@ -10,6 +10,7 @@ import { MascotStickers, RandomMascot } from "~/components/ui/mascot-stickers";
 type FormField = {
   id: string; type: string; label: string; placeholder: string | null;
   description: string | null; required: boolean | null; order: number;
+  page: number | null;
   options: unknown; settings: unknown; validations: unknown; conditionalLogic: unknown;
 };
 
@@ -211,6 +212,7 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
   const startTimeRef = useRef(Date.now());
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [currentPage, setCurrentPage] = useState(1);
   const [passwordUnlocked, setPasswordUnlocked] = useState(false);
   const [passwordInput, setPasswordInput] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -245,9 +247,9 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
   const accentColor = getTheme(form?.themeId ?? null);
   const headerColor = THEME_HEADER_COLORS[getThemeId(form?.themeId ?? null)] ?? "#cc0000";
 
-  const validate = () => {
+  const validate = (fieldsToCheck: typeof visibleFields = visibleFields) => {
     const newErrors: Record<string, string> = {};
-    for (const field of visibleFields) {
+    for (const field of fieldsToCheck) {
       const val = answers[field.id];
 
       if (field.required) {
@@ -311,13 +313,25 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
     return newErrors;
   };
 
+  const handleNextPage = () => {
+    const validationErrors = validate(visibleFields);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      toast.error("Please fix the errors before continuing");
+      return;
+    }
+    setErrors({});
+    setCurrentPage((p) => p + 1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleSubmit = () => {
     // Prevent duplicate submissions from the same anonymous browser session
     if (form?.id && localStorage.getItem(`submitted_form_${form.id}`)) {
       toast.error("You have already submitted this form.");
       return;
     }
-    const validationErrors = validate();
+    const validationErrors = validate(allVisibleFields);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       toast.error("Please fix the errors before submitting");
@@ -368,9 +382,20 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
   }
 
   const fields = form.fields ?? [];
-  const visibleFields = fields.filter((f) => evaluateConditions(f, answers));
-  const totalFields = visibleFields.length;
-  const answeredFields = visibleFields.filter((f) => {
+  const isMultiPage = !!(form as any).isMultiPage && ((form as any).totalPages ?? 1) > 1;
+  const totalPages = isMultiPage ? ((form as any).totalPages ?? 1) : 1;
+  const isLastPage = currentPage >= totalPages;
+
+  // All fields passing conditional logic
+  const allVisibleFields = fields.filter((f) => evaluateConditions(f, answers));
+  // On multi-page forms, only show current page's fields; all on single-page
+  const visibleFields = isMultiPage
+    ? allVisibleFields.filter((f) => (f.page ?? 1) === currentPage)
+    : allVisibleFields;
+
+  // Progress is based on all visible fields across all pages
+  const totalFields = allVisibleFields.length;
+  const answeredFields = allVisibleFields.filter((f) => {
     const v = answers[f.id];
     return v && v !== "[]" && v !== "false";
   }).length;
@@ -443,7 +468,9 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
           {form.showProgressBar && totalFields > 0 && (
             <div className="px-8 py-4" style={{ borderBottom: "2px solid #eee" }}>
               <div className="flex justify-between text-xs font-bold text-[#888] mb-2">
-                <span>{answeredFields} of {totalFields} answered</span>
+                <span>
+                  {isMultiPage ? `Page ${currentPage} of ${totalPages}` : `${answeredFields} of ${totalFields} answered`}
+                </span>
                 <span>{progressPercent}%</span>
               </div>
               <div className="h-3 bg-[#eee]" style={{ border: "2px solid #000" }}>
@@ -489,16 +516,34 @@ export default function PublicFormPage({ params }: { params: Promise<{ slug: str
           ))}
         </div>
 
-        {/* Submit */}
+        {/* Navigation / Submit */}
         {visibleFields.length > 0 && (
-          <div className="mt-6">
-            <button onClick={handleSubmit} disabled={submitMutation.isPending}
-              className="cartoon-btn w-full font-bangers text-2xl tracking-wider py-4 flex items-center justify-center gap-2 text-white disabled:opacity-60"
-              style={{ background: accentColor }}>
-              {submitMutation.isPending ? (
-                <><Loader2 className="h-5 w-5 animate-spin" /> SUBMITTING...</>
-              ) : "🚀 SUBMIT RESPONSE!"}
-            </button>
+          <div className="mt-6 flex gap-3">
+            {isMultiPage && currentPage > 1 && (
+              <button
+                onClick={() => { setCurrentPage((p) => p - 1); window.scrollTo({ top: 0, behavior: "smooth" }); }}
+                className="cartoon-btn flex-1 font-bangers text-xl tracking-wider py-4 bg-white text-[#1a1a1a] border-[3px] border-[#000]"
+              >
+                ← BACK
+              </button>
+            )}
+            {isMultiPage && !isLastPage ? (
+              <button
+                onClick={handleNextPage}
+                className="cartoon-btn flex-1 font-bangers text-xl tracking-wider py-4 text-white"
+                style={{ background: accentColor }}
+              >
+                NEXT PAGE →
+              </button>
+            ) : (
+              <button onClick={handleSubmit} disabled={submitMutation.isPending}
+                className="cartoon-btn flex-1 font-bangers text-2xl tracking-wider py-4 flex items-center justify-center gap-2 text-white disabled:opacity-60"
+                style={{ background: accentColor }}>
+                {submitMutation.isPending ? (
+                  <><Loader2 className="h-5 w-5 animate-spin" /> SUBMITTING...</>
+                ) : "🚀 SUBMIT RESPONSE!"}
+              </button>
+            )}
           </div>
         )}
 

@@ -25,6 +25,9 @@ import {
   Check,
   X,
   QrCode,
+  Code2,
+  Calendar,
+  Layers,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { Popover, PopoverContent, PopoverTrigger } from "~/components/ui/popover";
@@ -158,7 +161,12 @@ function SortableField({
             <span className="text-[#cc0000] text-xs font-bold">*</span>
           )}
         </div>
-        <div className="text-xs text-[#888] mt-0.5 uppercase tracking-wider font-bold">{fieldDef?.label}</div>
+        <div className="flex items-center gap-2 mt-0.5">
+          <div className="text-xs text-[#888] uppercase tracking-wider font-bold">{fieldDef?.label}</div>
+          {field.page && field.page > 1 && (
+            <span className="text-xs font-black text-white bg-[#7b1fa2] px-1.5 py-0.5 leading-none">P{field.page}</span>
+          )}
+        </div>
       </div>
       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
         <button
@@ -189,10 +197,12 @@ function SortableField({
 function FieldEditor({
   field,
   allFields,
+  totalPages,
   onUpdate,
 }: {
   field: Field;
   allFields: Field[];
+  totalPages: number;
   onUpdate: (data: Partial<Field>) => void;
 }) {
   const hasOptions = ["single_select", "multi_select", "dropdown"].includes(field.type);
@@ -279,6 +289,24 @@ function FieldEditor({
           <span className={`absolute top-0.5 h-4 w-4 bg-white shadow transition-transform ${field.required ? "translate-x-4" : "translate-x-0.5"}`} />
         </button>
       </div>
+
+      {totalPages > 1 && (
+        <div>
+          <label className="block text-xs font-bold text-[#1a1a1a] uppercase tracking-wide mb-2">
+            <Layers className="inline h-3.5 w-3.5 mr-1" />Page
+          </label>
+          <select
+            value={field.page ?? 1}
+            onChange={(e) => onUpdate({ page: parseInt(e.target.value) })}
+            className="w-full px-3 py-2 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none focus:ring-2 focus:ring-[#7b1fa2]"
+            style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000" }}
+          >
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              <option key={p} value={p}>Page {p}</option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {hasOptions && (
         <div>
@@ -602,6 +630,39 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
             </Popover>
           )}
 
+          {isPublished && form.slug && (
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  className="hidden sm:flex items-center gap-1.5 font-bold text-xs text-[#555] hover:text-[#7b1fa2] px-2 md:px-3 py-1.5 bg-white transition-colors"
+                  style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000" }}
+                  title="Embed form"
+                >
+                  <Code2 className="h-4 w-4" />
+                  <span className="hidden md:inline">EMBED</span>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-4" style={{ border:"3px solid #000", boxShadow:"4px 4px 0 #000" }}>
+                <p className="font-bangers text-sm text-[#7b1fa2] tracking-widest mb-3">&lt;/&gt; EMBED THIS FORM</p>
+                <p className="text-xs text-[#555] font-mono mb-2">Copy this snippet into your HTML:</p>
+                <div className="relative bg-[#1a1a1a] rounded p-3 mb-3">
+                  <pre className="text-xs text-[#aaffaa] font-mono whitespace-pre-wrap break-all leading-relaxed">{`<iframe\n  src="${typeof window !== "undefined" ? window.location.origin : "https://dexterforms-web.onrender.com"}/f/${form.slug}"\n  width="100%"\n  height="600"\n  frameborder="0"\n  style="border:none"\n></iframe>`}</pre>
+                </div>
+                <button
+                  onClick={() => {
+                    const code = `<iframe\n  src="${window.location.origin}/f/${form.slug}"\n  width="100%"\n  height="600"\n  frameborder="0"\n  style="border:none"\n></iframe>`;
+                    navigator.clipboard.writeText(code);
+                    toast.success("Embed code copied!");
+                  }}
+                  className="w-full py-2 text-xs font-black text-white bg-[#7b1fa2] hover:bg-[#6a1b9a] tracking-wider uppercase flex items-center justify-center gap-2"
+                  style={{ border:"2px solid #000" }}
+                >
+                  <Copy className="h-3.5 w-3.5" /> COPY EMBED CODE
+                </button>
+              </PopoverContent>
+            </Popover>
+          )}
+
           {isPublished ? (
             <button onClick={() => unpublishMutation.mutate({ id: formId })} disabled={unpublishMutation.isPending}
               className="cartoon-btn bg-white text-[#1a1a1a] font-bangers text-sm md:text-base px-3 md:px-4 py-1.5 tracking-wider">
@@ -858,6 +919,74 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
                     </button>
                   </div>
                 )}
+
+                {/* Multi-Page */}
+                <div className="border border-[#ddd] p-3 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-xs font-black text-[#888] uppercase tracking-widest">&gt; Multi-Page Form</span>
+                      <p className="text-xs text-[#888] font-mono mt-0.5">Split questions across multiple pages</p>
+                    </div>
+                    <button
+                      onClick={() => updateFormMutation.mutate({ id: formId, isMultiPage: !(form as any).isMultiPage, totalPages: (form as any).isMultiPage ? 1 : Math.max(2, (form as any).totalPages ?? 2) })}
+                      className={`relative h-5 w-9 transition-colors flex-shrink-0 ${(form as any).isMultiPage ? "bg-[#7b1fa2]" : "bg-[#e0e0e0]"}`}
+                    >
+                      <span className={`absolute top-0.5 h-4 w-4 bg-white shadow transition-transform ${(form as any).isMultiPage ? "translate-x-4" : "translate-x-0.5"}`} />
+                    </button>
+                  </div>
+                  {(form as any).isMultiPage && (
+                    <div>
+                      <label className="block text-xs font-black text-[#888] uppercase tracking-widest mb-1.5">&gt; Number of Pages</label>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => { const cur = (form as any).totalPages ?? 2; if (cur > 2) updateFormMutation.mutate({ id: formId, totalPages: cur - 1 }); }}
+                          className="w-8 h-8 flex items-center justify-center text-sm font-black bg-white hover:bg-[#fffde7]"
+                          style={{ border:"2px solid #000" }}
+                          disabled={(form as any).totalPages <= 2}
+                        >−</button>
+                        <span className="text-sm font-black text-[#1a1a1a] w-8 text-center">{(form as any).totalPages ?? 2}</span>
+                        <button
+                          onClick={() => { const cur = (form as any).totalPages ?? 2; if (cur < 10) updateFormMutation.mutate({ id: formId, totalPages: cur + 1 }); }}
+                          className="w-8 h-8 flex items-center justify-center text-sm font-black bg-white hover:bg-[#fffde7]"
+                          style={{ border:"2px solid #000" }}
+                        >+</button>
+                        <span className="text-xs text-[#888] font-mono">pages</span>
+                      </div>
+                      <p className="text-xs text-[#888] font-mono mt-1.5">Assign fields to pages in the Field Editor.</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Scheduling */}
+                <div className="border border-[#ddd] p-3 space-y-3">
+                  <p className="text-xs font-black text-[#888] uppercase tracking-widest">&gt; Schedule</p>
+                  <div>
+                    <label className="block text-xs font-bold text-[#555] uppercase tracking-widest mb-1.5 flex items-center gap-1">
+                      <Calendar className="h-3 w-3" /> Opens At
+                    </label>
+                    <input
+                      type="datetime-local"
+                      defaultValue={(form as any).opensAt ? new Date((form as any).opensAt).toISOString().slice(0, 16) : ""}
+                      onBlur={(e) => updateFormMutation.mutate({ id: formId, opensAt: e.target.value ? new Date(e.target.value) : null })}
+                      className="w-full px-3 py-2 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none"
+                      style={{ border:"2px solid #000" }}
+                    />
+                    <p className="text-xs text-[#888] font-mono mt-1">Leave empty to open immediately when published</p>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-[#555] uppercase tracking-widest mb-1.5 flex items-center gap-1">
+                      <Calendar className="h-3 w-3" /> Closes At
+                    </label>
+                    <input
+                      type="datetime-local"
+                      defaultValue={(form as any).expiresAt ? new Date((form as any).expiresAt).toISOString().slice(0, 16) : ""}
+                      onBlur={(e) => updateFormMutation.mutate({ id: formId, expiresAt: e.target.value ? new Date(e.target.value) : null })}
+                      className="w-full px-3 py-2 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none"
+                      style={{ border:"2px solid #000" }}
+                    />
+                    <p className="text-xs text-[#888] font-mono mt-1">Leave empty to never auto-close</p>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -956,6 +1085,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
               <FieldEditor
                 field={selectedField}
                 allFields={fields as Field[]}
+                totalPages={form.totalPages ?? 1}
                 onUpdate={(data) => handleUpdateField(selectedField.id, data)}
               />
             </div>

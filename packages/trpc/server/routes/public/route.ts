@@ -73,6 +73,8 @@ export const publicRouter = router({
         showProgressBar: z.boolean().nullable(),
         requiresPassword: z.boolean().nullable(),
         acceptingResponses: z.boolean().nullable(),
+        isMultiPage: z.boolean().nullable(),
+        totalPages: z.number().nullable(),
         fields: z.array(
           z.object({
             id: z.string(),
@@ -116,6 +118,13 @@ export const publicRouter = router({
         });
       }
 
+      if (form.opensAt && new Date() < form.opensAt) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "This form is not open yet",
+        });
+      }
+
       if (
         form.maxResponses !== null &&
         form.maxResponses !== undefined &&
@@ -140,6 +149,8 @@ export const publicRouter = router({
         showProgressBar: form.showProgressBar ?? null,
         requiresPassword: form.requiresPassword ?? null,
         acceptingResponses: form.acceptingResponses ?? null,
+        isMultiPage: form.isMultiPage ?? null,
+        totalPages: form.totalPages ?? null,
         fields,
       };
     }),

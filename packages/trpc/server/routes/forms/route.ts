@@ -18,6 +18,7 @@ const formOutputSchema = z.object({
   themeId: z.string().nullable(),
   acceptingResponses: z.boolean().nullable(),
   maxResponses: z.number().nullable(),
+  opensAt: z.date().nullable(),
   expiresAt: z.date().nullable(),
   requiresPassword: z.boolean().nullable(),
   successMessage: z.string().nullable(),
@@ -81,6 +82,10 @@ export const formsRouter = router({
         notifyOnResponse: z.boolean().optional(),
         requiresPassword: z.boolean().optional(),
         password: z.string().optional(),
+        isMultiPage: z.boolean().optional(),
+        totalPages: z.number().optional(),
+        expiresAt: z.date().nullable().optional(),
+        opensAt: z.date().nullable().optional(),
       })
     )
     .output(formOutputSchema)

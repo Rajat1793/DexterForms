@@ -34,6 +34,7 @@ export const formsTable = pgTable("forms", {
 
   acceptingResponses: boolean("accepting_responses").default(true),
   maxResponses: integer("max_responses"),
+  opensAt: timestamp("opens_at"),
   expiresAt: timestamp("expires_at"),
 
   requiresPassword: boolean("requires_password").default(false),
