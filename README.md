@@ -12,19 +12,38 @@
 
 ## ✨ Features
 
+### Core Builder
 - **12 Field Types** — Short text, long text, email, number, date, single/multi select, dropdown, checkbox, rating, phone, URL
-- **Dexter's Lab Theme** — Bright 90s cartoon aesthetic throughout the entire UI
 - **Drag-and-Drop Builder** — Reorder fields with smooth DnD, live preview panel
-- **6 Quick-Start Templates** — Contact Form, Feedback, Job Application, Event Registration, Survey, Bug Report — all pre-populated with relevant fields
+- **6 Quick-Start Templates** — Contact Form, Feedback, Job Application, Event Registration, Survey, Bug Report
+- **13 Themes** — Dexter, Minimal, Dark, Matrix, Sakura, Cyberpunk, Ocean, Nebula, Retro, Dracula, Naruto, Midnight, Startup
+
+### Form Logic & Access Control
+- **Conditional Logic** — Field-level show/hide rules (`eq`, `neq`, `contains`, `is_empty`, `is_not_empty` operators); evaluated live on the public form
+- **Password-Protected Forms** — bcrypt-hashed password gate on the public form URL
+- **Multi-Page Forms** — Split questions across up to 10 pages; per-field page assignment in the Field Editor; Next/Back navigation with per-page validation on the public form
+- **Scheduled Publish / Auto-Close** — Set an `Opens At` date (form blocked until then) and a `Closes At` date (auto-closes after); both configurable from the builder settings
+
+### Sharing & Discovery
 - **Public Form Filling** — Shareable `/f/[slug]` links, no login required for respondents
+- **QR Code Sharing** — Inline QR code popover for every published form
+- **Embed Code** — One-click `<iframe>` snippet generator; copy to clipboard from the form builder top bar
+- **Public Explore Page** — Browse all public forms at `/explore` with live search (debounced 400 ms)
+- **Visibility Control** — `public` (searchable on Explore) or `unlisted` (link-only)
+
+### Responses & Analytics
 - **Response Management** — Browse, filter, and delete individual responses
-- **Analytics Dashboard** — Per-field answer distributions, daily trend chart, completion time
-- **CSV Export** — One-click download of all responses
+- **Read / Unread Status** — Unread responses highlighted with orange indicator; auto-marked read on first open; unread count shown in the responses page header
+- **Analytics Dashboard** — Per-field answer distributions, daily trend chart, completion time stats
+- **CSV Export** — One-click download of all responses with full field labels
+
+### Operations
 - **Duplicate Forms** — Clone any form instantly
-- **JWT Authentication** — Secure stateless auth, 7-day tokens
-- **Rate Limiting** — Auth: 10 req/15min, Submissions: 30 req/hr
+- **Form Archive** — Soft-archive forms (`status = archived`) to hide from active views without losing data; restore at any time
+- **JWT Authentication** — Stateless auth via httpOnly cookie (`df_token`) + `Authorization: Bearer` header; 7-day tokens
+- **Rate Limiting** — Auth endpoints: 10 req/15 min · Submission endpoint: 30 req/hr
+- **Email Notifications** — Optional SMTP notification sent to form creator on new response
 - **Interactive API Docs** — Scalar UI at `/docs`
-- **Email Notifications** — Optional SMTP integration
 
 ---
 
@@ -42,6 +61,122 @@
 | Drag & Drop | @dnd-kit/sortable |
 | Charts | Recharts |
 | API Docs | Scalar (trpc-to-openapi) |
+
+---
+
+## 🗄 Database Schema
+
+### ER Diagram
+
+```mermaid
+erDiagram
+    users {
+        uuid id PK
+        varchar email UK
+        varchar fullName
+        varchar passwordHash
+        boolean emailVerified
+        varchar resetPasswordToken
+        timestamp resetPasswordTokenExpires
+        timestamp createdAt
+        timestamp updatedAt
+    }
+
+    forms {
+        uuid id PK
+        uuid creatorId FK
+        varchar title
+        text description
+        varchar slug UK
+        varchar status "draft|published|closed|archived"
+        varchar visibility "public|unlisted"
+        varchar themeId
+        jsonb customColors
+        boolean acceptingResponses
+        integer maxResponses
+        timestamp opensAt
+        timestamp expiresAt
+        boolean requiresPassword
+        varchar passwordHash
+        text successMessage
+        varchar redirectUrl
+        boolean showProgressBar
+        boolean isMultiPage
+        integer totalPages
+        integer responseCount
+        boolean notifyOnResponse
+        timestamp createdAt
+        timestamp updatedAt
+    }
+
+    form_fields {
+        uuid id PK
+        uuid formId FK
+        varchar type
+        varchar label
+        varchar placeholder
+        text description
+        boolean required
+        integer order
+        integer page
+        jsonb validations
+        jsonb options
+        jsonb settings
+        jsonb conditionalLogic
+        timestamp createdAt
+        timestamp updatedAt
+    }
+
+    responses {
+        uuid id PK
+        uuid formId FK
+        varchar respondentEmail
+        varchar respondentName
+        varchar ipAddress
+        text userAgent
+        integer completionTime
+        jsonb metadata
+        timestamp readAt
+        timestamp createdAt
+    }
+
+    response_answers {
+        uuid id PK
+        uuid responseId FK
+        uuid fieldId FK
+        text value
+        timestamp createdAt
+    }
+
+    users ||--o{ forms : "creates"
+    forms ||--o{ form_fields : "has"
+    forms ||--o{ responses : "receives"
+    responses ||--o{ response_answers : "contains"
+    form_fields ||--o{ response_answers : "answers"
+```
+
+### Key Column Notes
+
+| Column | Table | Details |
+|---|---|---|
+| `status` | `forms` | `draft` → `published` → `closed` / `archived` (soft-delete) |
+| `opensAt` | `forms` | Form returns FORBIDDEN until this timestamp passes (scheduled publish) |
+| `expiresAt` | `forms` | Form auto-closes after this timestamp (auto-close) |
+| `isMultiPage` | `forms` | Enables multi-page mode; `totalPages` sets the page count (max 10) |
+| `requiresPassword` | `forms` | Enables bcrypt password gate; hash stored separately in `passwordHash` |
+| `page` | `form_fields` | Page number (1-indexed) for multi-page forms; ignored when `isMultiPage = false` |
+| `conditionalLogic` | `form_fields` | `{ showIf: [{ fieldId, operator, value }] }` — all rules must match (AND logic) |
+| `readAt` | `responses` | `NULL` = unread; set to current timestamp on first open in the responses panel |
+
+### Migrations
+
+| File | Changes |
+|---|---|
+| `0000_dusty_morg.sql` | Initial schema — users, forms, form_fields, responses, response_answers |
+| `0001_faulty_tyrannus.sql` | Added auth fields, form settings columns |
+| `0002_swift_midnight.sql` | Added conditional logic, password, multi-page, scheduling, visibility columns |
+| `0003_rare_ted_forrester.sql` | Added `reset_password_token`, `notify_on_response` |
+| `0004_multi_page_read_status.sql` | Added `opens_at` to forms; `read_at` to responses |
 
 ---
 
@@ -100,6 +235,11 @@ Email:    demo@dexterforms.dev
 Password: Demo@123456
 ```
 
+Demo forms available at:
+- `/f/stranger-things-fan-survey`
+- `/f/anime-character-survey`
+- `/f/startup-pitch-validator`
+
 ---
 
 ## 📁 Project Structure
@@ -115,22 +255,25 @@ Password: Demo@123456
 │       ├── app/
 │       │   ├── page.tsx              # Landing page
 │       │   ├── pricing/              # Pricing page
-│       │   ├── auth/                 # Login & Register
+│       │   ├── explore/              # Public form discovery + live search
+│       │   ├── auth/                 # Login, Register, Forgot/Reset Password
 │       │   ├── dashboard/            # Creator dashboard
 │       │   │   └── forms/
-│       │   │       ├── [id]/         # Form builder
-│       │   │       │   ├── responses/  # Response manager
+│       │   │       ├── [id]/         # Form builder (fields, settings, theme tabs)
+│       │   │       │   ├── responses/  # Response manager (read/unread, export)
 │       │   │       │   └── analytics/  # Analytics dashboard
 │       │   │       └── new/          # Create form wizard (templates)
-│       │   └── f/[slug]/             # Public form filling
+│       │   └── f/[slug]/             # Public form (multi-page, password gate, conditional logic)
 │       └── providers/
 │           ├── auth.tsx              # JWT auth context
 │           └── global.tsx            # React Query + tRPC setup
 └── packages/
-    ├── database/     # Drizzle schema, migrations, seed
-    ├── services/     # Business logic (auth, form, response, theme, email)
-    ├── trpc/         # tRPC router, context, procedures
-    └── logger/       # Shared logging utility
+    ├── database/             # Drizzle schema, migrations, seed
+    │   ├── models/           # Table definitions (form, form-field, response, user)
+    │   └── drizzle/          # Migration SQL files + Drizzle meta snapshots
+    ├── services/             # Business logic (auth, form, response, theme, email, user)
+    ├── trpc/                 # tRPC router, context, procedures, routes
+    └── logger/               # Shared logging utility
 ```
 
 ---
@@ -188,147 +331,5 @@ pnpm db:migrate    # Apply pending migrations
 pnpm db:seed       # Seed demo data
 pnpm db:studio     # Open Drizzle Studio (DB GUI)
 ```
-
----
-
-## 🌐 Free Deployment Guide
-
-This stack can be deployed completely free using:
-
-| Service | What it hosts | Free tier |
-|---|---|---|
-| **Neon** | PostgreSQL database | 512 MB, no sleep |
-| **Render** | Express/tRPC API | 512 MB RAM, sleeps after 15 min |
-| **Vercel** | Next.js frontend | Unlimited hobby projects |
-
----
-
-### Step 1 — Database on Neon (free PostgreSQL)
-
-1. Sign up at **https://neon.tech** (GitHub login works)
-2. Create a new project → choose a region close to you
-3. Copy the **Connection String** — it looks like:
-   ```
-   postgresql://user:password@ep-xxx.us-east-1.aws.neon.tech/neondb?sslmode=require
-   ```
-4. Save this as `DATABASE_URL` — you'll need it for both Render and migrations
-
-Run migrations against your Neon DB locally:
-```bash
-DATABASE_URL="postgresql://..." pnpm db:migrate
-DATABASE_URL="postgresql://..." pnpm db:seed
-```
-
----
-
-### Step 2 — API on Render (free Express server)
-
-1. Sign up at **https://render.com** (GitHub login works)
-2. Click **New → Web Service** → connect your GitHub repo
-3. Configure:
-   - **Root Directory**: `apps/api`
-   - **Build Command**: `cd ../.. && pnpm install && pnpm --filter api build`
-   - **Start Command**: `node dist/index.js`
-   - **Instance Type**: Free
-4. Add **Environment Variables**:
-   ```
-   NODE_ENV=prod
-   DATABASE_URL=<your Neon connection string>
-   JWT_SECRET=<generate a strong random string>
-   JWT_EXPIRES_IN=7d
-   FRONTEND_URL=https://<your-vercel-app>.vercel.app
-   BASE_URL=https://<your-render-service>.onrender.com
-   ```
-5. Click **Deploy** — note the public URL (e.g. `https://dexterforms-api.onrender.com`)
-
-> **Note**: Free Render services sleep after 15 minutes of inactivity. The first request after sleep takes ~30 seconds to wake up. Upgrade to a paid plan ($7/mo) to keep it always-on.
-
----
-
-### Step 3 — Frontend on Vercel (free Next.js hosting)
-
-1. Sign up at **https://vercel.com** (GitHub login works)
-2. Click **Add New → Project** → import your GitHub repo
-3. Configure:
-   - **Framework Preset**: Next.js (auto-detected)
-   - **Root Directory**: `apps/web`
-4. Add **Environment Variables**:
-   ```
-   NEXT_PUBLIC_API_URL=https://<your-render-service>.onrender.com/trpc
-   NEXT_PUBLIC_APP_URL=https://<your-vercel-app>.vercel.app
-   ```
-5. Click **Deploy**
-
----
-
-### Step 4 — Update CORS on Render
-
-Once Vercel gives you your production URL, go back to Render → your API service → Environment and update:
-```
-FRONTEND_URL=https://<your-actual-vercel-url>.vercel.app
-```
-Then trigger a redeploy on Render.
-
----
-
-### Free Tier Limits Summary
-
-| Service | Limit | Notes |
-|---|---|---|
-| Neon | 512 MB storage, 0.25 vCPU compute hours/month | Enough for thousands of forms |
-| Render | 750 hrs/month, 512 MB RAM, sleeps | ~1 instance free 24/7 |
-| Vercel | 100 GB bandwidth/month, unlimited deployments | More than enough |
-
----
-
-### Alternative: Deploy Everything on Railway
-
-Railway gives **$5 free credit/month** and supports monorepos natively.
-
-1. Sign up at **https://railway.app**
-2. Create new project → **Deploy from GitHub**
-3. Add services: **PostgreSQL** (from Railway's templates) + **two Node services** (api + web)
-4. Set env vars per service (same as above)
-5. Railway handles the rest automatically
-
----
-
-## 🗄 Database Schema
-
-```
-users            → id, email, fullName, passwordHash, emailVerified
-forms            → id, creatorId, title, slug, status, themeId, settings…
-form_fields      → id, formId, type, label, options, order, validations…
-responses        → id, formId, respondentEmail, completionTime…
-response_answers → id, responseId, fieldId, value
-```
-
----
-
-## 🔌 API Reference
-
-Interactive docs available at `/docs` (Scalar UI).
-
-| Method | Procedure | Auth | Description |
-|---|---|---|---|
-| POST | `auth.register` | No | Create account |
-| POST | `auth.login` | No | Login → JWT |
-| GET | `auth.me` | Yes | Current user |
-| POST | `forms.create` | Yes | Create form |
-| GET | `forms.list` | Yes | List my forms |
-| POST | `forms.publish` | Yes | Publish form |
-| POST | `forms.duplicate` | Yes | Clone form |
-| POST | `fields.add` | Yes | Add field to form |
-| GET | `public.getFormBySlug` | No | Get public form |
-| POST | `public.submitResponse` | No | Submit response |
-| GET | `responses.analytics` | Yes | Form analytics |
-| GET | `responses.getByForm` | Yes | List responses |
-
----
-
-## License
-
-MIT
-
 
 ---

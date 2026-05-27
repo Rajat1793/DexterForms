@@ -36,6 +36,13 @@
       "when": 1748367600000,
       "tag": "0004_multi_page_read_status",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1748371200000,
+      "tag": "0005_backfill_opens_at_read_at",
+      "breakpoints": true
     }
   ]
 }
