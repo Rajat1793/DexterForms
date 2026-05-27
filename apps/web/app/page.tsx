@@ -97,6 +97,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-7xl flex items-center justify-between px-6 py-3">
           <Link href="/"><Image src="/dexterlogo.png" alt="DexterForms" height={40} width={160} style={{ height: "auto" }} className="object-contain" priority /></Link>
           <div className="hidden md:flex items-center gap-6">
+            <Link href="/explore" className="font-bold text-[#1a1a1a] hover:text-[#cc0000] uppercase text-sm tracking-wide">Explore</Link>
             <Link href="/pricing" className="font-bold text-[#1a1a1a] hover:text-[#cc0000] uppercase text-sm tracking-wide">Pricing</Link>
             <Link href="https://dexterforms-api.onrender.com/docs" target="_blank" className="font-bold text-[#1a1a1a] hover:text-[#cc0000] uppercase text-sm tracking-wide">API Docs</Link>
           </div>

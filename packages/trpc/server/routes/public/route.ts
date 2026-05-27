@@ -10,6 +10,35 @@ const TAGS = ["Public"];
 const getPath = generatePath("/public");
 
 export const publicRouter = router({
+  listPublicForms: publicProcedure
+    .meta({ openapi: { method: "GET", path: getPath("/forms"), tags: TAGS } })
+    .input(z.object({ search: z.string().optional() }).optional())
+    .output(
+      z.array(
+        z.object({
+          id: z.string(),
+          title: z.string(),
+          description: z.string().nullable(),
+          slug: z.string().nullable(),
+          themeId: z.string().nullable(),
+          responseCount: z.number().nullable(),
+          createdAt: z.date().nullable(),
+        })
+      )
+    )
+    .query(async ({ input }) => {
+      const rows = await formService.getPublicForms(input?.search);
+      return rows.map((f) => ({
+        id: f.id,
+        title: f.title,
+        description: f.description ?? null,
+        slug: f.slug ?? null,
+        themeId: f.themeId ?? null,
+        responseCount: f.responseCount ?? null,
+        createdAt: f.createdAt ?? null,
+      }));
+    }),
+
   verifyFormPassword: publicProcedure
     .meta({
       openapi: { method: "POST", path: getPath("/forms/{slug}/verify-password"), tags: TAGS },

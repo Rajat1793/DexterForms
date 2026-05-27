@@ -1,6 +1,6 @@
 import { db } from "@repo/database";
 import { formsTable, formFieldsTable } from "@repo/database/schema";
-import { eq, and, ne, desc, count, sql } from "@repo/database";
+import { eq, and, ne, or, ilike, desc, count, sql } from "@repo/database";
 import { InsertForm, InsertFormField } from "@repo/database/schema";
 import { hashPassword } from "../auth";
 
@@ -31,6 +31,22 @@ class FormService {
       })
       .returning();
     return form!;
+  }
+
+  async getPublicForms(search?: string) {
+    const baseCondition = and(
+      eq(formsTable.status, "published"),
+      eq(formsTable.visibility, "public")
+    );
+    const condition = search?.trim()
+      ? and(baseCondition, ilike(formsTable.title, `%${search.trim()}%`))
+      : baseCondition;
+    return db
+      .select()
+      .from(formsTable)
+      .where(condition)
+      .orderBy(desc(formsTable.responseCount), desc(formsTable.createdAt))
+      .limit(60);
   }
 
   async getFormsByCreator(creatorId: string) {

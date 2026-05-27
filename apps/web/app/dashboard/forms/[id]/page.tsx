@@ -63,7 +63,19 @@ const FIELD_TYPES = [
 ];
 
 const THEMES = [
-  { id: "dexter", name: "Dexter's Lab", emoji: "🧪" },
+  { id: "dexter",    name: "Dexter's Lab",   emoji: "🧪", color: "#cc0000" },
+  { id: "minimal",   name: "Minimal Purple",  emoji: "🖥️", color: "#7c3aed" },
+  { id: "dark",      name: "Dark Mode",       emoji: "🌑", color: "#1e1b4b" },
+  { id: "matrix",    name: "Matrix",          emoji: "💻", color: "#166534" },
+  { id: "sakura",    name: "Sakura",          emoji: "🌸", color: "#be185d" },
+  { id: "cyberpunk", name: "Cyberpunk",       emoji: "⚡", color: "#3730a3" },
+  { id: "ocean",     name: "Ocean",           emoji: "🌊", color: "#0369a1" },
+  { id: "nebula",    name: "Nebula",          emoji: "🔮", color: "#581c87" },
+  { id: "retro",     name: "Retro",           emoji: "🍺", color: "#c2410c" },
+  { id: "dracula",   name: "Dracula",         emoji: "🦷", color: "#4c1d95" },
+  { id: "naruto",    name: "Naruto",          emoji: "🍥", color: "#c2410c" },
+  { id: "midnight",  name: "Midnight",        emoji: "🌙", color: "#1c1917" },
+  { id: "startup",   name: "Startup",         emoji: "💰", color: "#065f46" },
 ];
 
 const CONDITION_OPERATORS = [
@@ -852,23 +864,26 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
             {activeTab === "theme" && (
               <div className="p-4">
                 <p className="text-xs font-black text-[#555] uppercase tracking-widest mb-3">&gt; CHOOSE THEME</p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1.5">
                   {THEMES.map((theme) => (
                     <button
                       key={theme.id}
                       onClick={() => updateFormMutation.mutate({ id: formId, themeId: theme.id })}
-                      className={`flex items-center gap-2 border p-3 text-left transition-all ${
+                      className={`flex items-center gap-2.5 w-full px-3 py-2 text-left transition-all ${
                         form.themeId === theme.id
-                          ? "border-[#cc0000] bg-[#fff0f0]"
-                          : "border-[#ddd] hover:border-[#bbb] hover:bg-[#fffde7]"
+                          ? "bg-[#fff9c4] border-[#cc0000]"
+                          : "hover:bg-[#fffde7] border-transparent"
                       }`}
+                      style={{ border: `2px solid ${form.themeId === theme.id ? "#cc0000" : "#ddd"}` }}
                     >
+                      <div
+                        className="h-5 w-5 flex-shrink-0"
+                        style={{ background: theme.color, border: "2px solid #000" }}
+                      />
                       <span className="text-sm">{theme.emoji}</span>
-                      <div>
-                        <div className="text-xs font-black text-[#1a1a1a] tracking-wide">{theme.name}</div>
-                      </div>
+                      <span className="flex-1 text-xs font-black text-[#1a1a1a] tracking-wide">{theme.name}</span>
                       {form.themeId === theme.id && (
-                        <Check className="h-3 w-3 text-[#cc0000] ml-auto" />
+                        <Check className="h-3.5 w-3.5 text-[#cc0000] flex-shrink-0" />
                       )}
                     </button>
                   ))}
