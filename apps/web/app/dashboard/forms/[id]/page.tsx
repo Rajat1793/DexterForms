@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, useEffect, useRef, use } from "react";
 import Link from "next/link";
 import { ConfirmModal } from "~/components/ui/confirm-modal";
 import { useRouter } from "next/navigation";
@@ -211,6 +211,35 @@ function FieldEditor({
   const logic: ConditionalLogic = (field.conditionalLogic as ConditionalLogic | null) ?? { showIf: [] };
   const otherFields = allFields.filter((f) => f.id !== field.id);
 
+  // Local state for text inputs — prevents API call on every keystroke.
+  // onUpdate (→ API) is called only on onBlur.
+  const [localLabel, setLocalLabel] = useState(field.label);
+  const [localPlaceholder, setLocalPlaceholder] = useState(field.placeholder ?? "");
+  const [localDescription, setLocalDescription] = useState(field.description ?? "");
+
+  // Sync local state when a different field is selected
+  useEffect(() => {
+    setLocalLabel(field.label);
+    setLocalPlaceholder(field.placeholder ?? "");
+    setLocalDescription(field.description ?? "");
+  }, [field.id]);
+
+  // Local state for option labels (text inputs inside options list)
+  const [localOptionLabels, setLocalOptionLabels] = useState<string[]>(
+    options.map((o) => o.label)
+  );
+  useEffect(() => {
+    setLocalOptionLabels(options.map((o) => o.label));
+  }, [field.id, options.length]);
+
+  // Local state for conditional rule "value" text inputs
+  const [localRuleValues, setLocalRuleValues] = useState<string[]>(
+    logic.showIf.map((r) => r.value)
+  );
+  useEffect(() => {
+    setLocalRuleValues(logic.showIf.map((r) => r.value));
+  }, [field.id, logic.showIf.length]);
+
   const addRule = () => {
     if (otherFields.length === 0) return;
     const newRule: ConditionalRule = { fieldId: otherFields[0]!.id, operator: "eq", value: "" };
@@ -232,7 +261,7 @@ function FieldEditor({
     onUpdate({ options: [...options, newOption] });
   };
 
-  const updateOption = (idx: number, label: string) => {
+  const commitOptionLabel = (idx: number, label: string) => {
     const updated = [...options];
     updated[idx] = { value: label.toLowerCase().replace(/\s+/g, "_"), label };
     onUpdate({ options: updated });
@@ -248,8 +277,13 @@ function FieldEditor({
         <label className="block text-xs font-bold text-[#1a1a1a] uppercase tracking-wide mb-2">Label</label>
         <input
           type="text"
-          value={field.label}
-          onChange={(e) => onUpdate({ label: e.target.value })}
+          value={localLabel}
+          onChange={(e) => setLocalLabel(e.target.value)}
+          onBlur={() => {
+            const trimmed = localLabel.trim();
+            if (!trimmed) { setLocalLabel(field.label); return; } // revert — empty label is invalid
+            if (trimmed !== field.label) onUpdate({ label: trimmed });
+          }}
           className="w-full px-3 py-2 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none focus:ring-2 focus:ring-[#cc0000]"
           style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000" }}
           placeholder="Field label"
@@ -260,8 +294,9 @@ function FieldEditor({
         <label className="block text-xs font-bold text-[#1a1a1a] uppercase tracking-wide mb-2">Placeholder</label>
         <input
           type="text"
-          value={field.placeholder ?? ""}
-          onChange={(e) => onUpdate({ placeholder: e.target.value })}
+          value={localPlaceholder}
+          onChange={(e) => setLocalPlaceholder(e.target.value)}
+          onBlur={() => { if (localPlaceholder !== (field.placeholder ?? "")) onUpdate({ placeholder: localPlaceholder }); }}
           className="w-full px-3 py-2 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none focus:ring-2 focus:ring-[#cc0000]"
           style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000" }}
           placeholder="Placeholder text"
@@ -271,8 +306,9 @@ function FieldEditor({
       <div>
         <label className="block text-xs font-bold text-[#1a1a1a] uppercase tracking-wide mb-2">Help Text</label>
         <textarea
-          value={field.description ?? ""}
-          onChange={(e) => onUpdate({ description: e.target.value })}
+          value={localDescription}
+          onChange={(e) => setLocalDescription(e.target.value)}
+          onBlur={() => { if (localDescription !== (field.description ?? "")) onUpdate({ description: localDescription }); }}
           className="w-full px-3 py-2 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none focus:ring-2 focus:ring-[#cc0000] resize-none"
           style={{ border:"2px solid #000", boxShadow:"2px 2px 0 #000" }}
           rows={2}
@@ -316,8 +352,23 @@ function FieldEditor({
               <div key={idx} className="flex items-center gap-2">
                 <input
                   type="text"
-                  value={opt.label}
-                  onChange={(e) => updateOption(idx, e.target.value)}
+                  value={localOptionLabels[idx] ?? opt.label}
+                  onChange={(e) => {
+                    const updated = [...localOptionLabels];
+                    updated[idx] = e.target.value;
+                    setLocalOptionLabels(updated);
+                  }}
+                  onBlur={() => {
+                    const newLabel = (localOptionLabels[idx] ?? opt.label).trim();
+                    if (!newLabel) {
+                      // revert empty option label
+                      const reverted = [...localOptionLabels];
+                      reverted[idx] = opt.label;
+                      setLocalOptionLabels(reverted);
+                      return;
+                    }
+                    if (newLabel !== opt.label) commitOptionLabel(idx, newLabel);
+                  }}
                   className="flex-1 px-3 py-1.5 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none focus:ring-2 focus:ring-[#cc0000]"
                   style={{ border:"2px solid #000" }}
                 />
@@ -406,8 +457,16 @@ function FieldEditor({
                   {needsValue && (
                     <input
                       type="text"
-                      value={rule.value}
-                      onChange={(e) => updateRule(idx, { value: e.target.value })}
+                      value={localRuleValues[idx] ?? rule.value}
+                      onChange={(e) => {
+                        const updated = [...localRuleValues];
+                        updated[idx] = e.target.value;
+                        setLocalRuleValues(updated);
+                      }}
+                      onBlur={() => {
+                        const newVal = localRuleValues[idx] ?? rule.value;
+                        if (newVal !== rule.value) updateRule(idx, { value: newVal });
+                      }}
                       className="w-full px-2 py-1.5 text-xs font-bold text-[#1a1a1a] bg-white focus:outline-none"
                       style={{ border: "2px solid #000" }}
                       placeholder="Value to compare"
@@ -437,15 +496,16 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
   const { data: form, isLoading: formLoading } = trpc.forms.getById.useQuery({ id: formId });
   const { data: fields = [], isLoading: fieldsLoading } = trpc.fields.getByForm.useQuery({ formId });
 
-  const [localFields, setLocalFields] = useState<Field[]>([]);
+  // Local title state — keeps the input responsive; debounces the save mutation
+  const [localTitle, setLocalTitle] = useState("");
+  const titleDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Sync local fields when remote loads
-  useState(() => {
-    if (fields.length > 0) setLocalFields(fields as Field[]);
-  });
+  // Initialise local title once the form loads (and only then)
+  useEffect(() => {
+    if (form?.title) setLocalTitle(form.title);
+  }, [form?.id]);
 
-  const selectedField = localFields.find((f) => f.id === selectedFieldId) ??
-    (fields as Field[]).find((f) => f.id === selectedFieldId);
+  const selectedField = (fields as Field[]).find((f) => f.id === selectedFieldId);
 
   const publishMutation = trpc.forms.publish.useMutation({
     onSuccess: () => { toast.success("Form published! 🎉"); utils.forms.getById.invalidate({ id: formId }); },
@@ -474,6 +534,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
 
   const updateFieldMutation = trpc.fields.update.useMutation({
     onSuccess: () => { utils.fields.getByForm.invalidate({ formId }); },
+    onError: (e) => toast.error(e.message),
   });
 
   const deleteFieldMutation = trpc.fields.delete.useMutation({
@@ -571,8 +632,15 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
         <div className="flex-1 min-w-0">
           <input
             type="text"
-            value={form.title}
-            onChange={(e) => updateFormMutation.mutate({ id: formId, title: e.target.value })}
+            value={localTitle}
+            onChange={(e) => {
+              const newTitle = e.target.value;
+              setLocalTitle(newTitle);
+              if (titleDebounceRef.current) clearTimeout(titleDebounceRef.current);
+              titleDebounceRef.current = setTimeout(() => {
+                if (newTitle.trim()) updateFormMutation.mutate({ id: formId, title: newTitle });
+              }, 600);
+            }}
             className="text-base font-bangers text-[#1a1a1a] bg-transparent border-none outline-none w-full tracking-wider uppercase placeholder:text-[#888]"
           />
         </div>
