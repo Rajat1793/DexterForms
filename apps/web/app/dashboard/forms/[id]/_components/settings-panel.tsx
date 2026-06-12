@@ -4,6 +4,13 @@ import { Check, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { type FormShape, type UpdateFormData } from "../_types";
 
+function toLocalDatetimeInput(value: Date | string | null | undefined): string {
+  if (!value) return "";
+  const d = new Date(value);
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
 interface SettingsPanelProps {
   form: FormShape;
   onUpdate: (data: UpdateFormData) => void;
@@ -313,9 +320,7 @@ export function SettingsPanel({
           </label>
           <input
             type="datetime-local"
-            defaultValue={
-              form.opensAt ? new Date(form.opensAt).toISOString().slice(0, 16) : ""
-            }
+            defaultValue={toLocalDatetimeInput(form.opensAt)}
             onBlur={(e) =>
               onUpdate({ opensAt: e.target.value ? new Date(e.target.value) : null })
             }
@@ -332,9 +337,7 @@ export function SettingsPanel({
           </label>
           <input
             type="datetime-local"
-            defaultValue={
-              form.expiresAt ? new Date(form.expiresAt).toISOString().slice(0, 16) : ""
-            }
+            defaultValue={toLocalDatetimeInput(form.expiresAt)}
             onBlur={(e) =>
               onUpdate({ expiresAt: e.target.value ? new Date(e.target.value) : null })
             }

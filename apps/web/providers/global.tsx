@@ -12,8 +12,11 @@ import { createTRPCHttpBatchClientClient } from "~/trpc/create-client";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnMount: true,
-      staleTime: 30_000,
+      staleTime: 5 * 60 * 1000,      // data stays fresh for 5 minutes
+      gcTime: 15 * 60 * 1000,        // keep unused data in memory for 15 minutes
+      refetchOnWindowFocus: false,    // don't re-call server when user switches tabs
+      refetchOnReconnect: false,      // don't re-call on network reconnect
+      refetchOnMount: true,           // still fetch on first mount, skip if still fresh
       retry: 1,
     },
   },
