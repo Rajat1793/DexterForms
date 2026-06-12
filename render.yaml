@@ -67,3 +67,20 @@ services:
         value: https://dexterforms-api.onrender.com/trpc
       - key: NEXT_PUBLIC_APP_URL
         value: https://dexterforms-web.onrender.com
+
+  # ── Keep-alive cron job ─────────────────────────────────────────────────────
+  # Pings both services every 14 minutes so Render free tier never spins them
+  # down (free tier idles after 15 minutes of no inbound traffic).
+  - type: cron
+    name: dexterforms-keepalive
+    runtime: node
+    plan: free
+    schedule: "*/14 * * * *"
+    buildCommand: "echo 'keepalive'"
+    startCommand: >
+      node -e "
+        Promise.all([
+          fetch('https://dexterforms-api.onrender.com/health').then(r => r.json()).then(d => console.log('[API]', JSON.stringify(d))),
+          fetch('https://dexterforms-web.onrender.com/api/health').then(r => r.json()).then(d => console.log('[WEB]', JSON.stringify(d)))
+        ]).catch(e => { console.error('Keepalive failed:', e.message); process.exit(1); })
+      "

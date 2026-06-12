@@ -109,8 +109,8 @@ export default function LandingPage() {
               </>
             ) : (
               <>
-                <Link href="/auth/login" className="font-bold text-[#1a1a1a] hover:text-[#cc0000] uppercase text-sm tracking-wide">Login</Link>
-                <Link href="/auth/register" className="cartoon-btn bg-[#cc0000] text-white font-bangers text-xl px-5 py-2 tracking-wider">START FREE!</Link>
+                <Link href="/auth/login" prefetch={false} className="font-bold text-[#1a1a1a] hover:text-[#cc0000] uppercase text-sm tracking-wide">Login</Link>
+                <Link href="/auth/register" prefetch={false} className="cartoon-btn bg-[#cc0000] text-white font-bangers text-xl px-5 py-2 tracking-wider">START FREE!</Link>
               </>
             )}
           </div>
@@ -260,7 +260,7 @@ export default function LandingPage() {
               🧪 ENTER THE LAB!
             </Link>
             {!user && (
-              <Link href="/auth/login" className="cartoon-btn bg-white text-[#cc0000] font-bangers text-2xl px-8 py-3 tracking-wider">
+              <Link href="/auth/login" prefetch={false} className="cartoon-btn bg-white text-[#cc0000] font-bangers text-2xl px-8 py-3 tracking-wider">
                 ALREADY A SCIENTIST?
               </Link>
             )}
@@ -279,8 +279,8 @@ export default function LandingPage() {
           <div className="flex items-center gap-6 text-xs text-[#888]">
             <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
             <Link href="https://dexterforms-api.onrender.com/docs" target="_blank" className="hover:text-white transition-colors">API Docs</Link>
-            <Link href="/auth/login" className="hover:text-white transition-colors">Login</Link>
-            <Link href="/auth/register" className="hover:text-white transition-colors">Register</Link>
+            <Link href="/auth/login" prefetch={false} className="hover:text-white transition-colors">Login</Link>
+            <Link href="/auth/register" prefetch={false} className="hover:text-white transition-colors">Register</Link>
           </div>
           <p className="text-[#555] text-xs">Built with tRPC · Drizzle · Next.js · Zod</p>
         </div>
