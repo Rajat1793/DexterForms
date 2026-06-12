@@ -43,6 +43,13 @@
       "when": 1748371200000,
       "tag": "0005_backfill_opens_at_read_at",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1781271262553,
+      "tag": "0006_fix_missing_columns",
+      "breakpoints": true
     }
   ]
 }
