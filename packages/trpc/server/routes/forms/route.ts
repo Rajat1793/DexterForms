@@ -84,16 +84,25 @@ export const formsRouter = router({
         password: z.string().optional(),
         isMultiPage: z.boolean().optional(),
         totalPages: z.number().optional(),
-        expiresAt: z.date().nullable().optional(),
-        opensAt: z.date().nullable().optional(),
+        expiresAt: z.coerce.date().nullable().optional(),
+        opensAt: z.coerce.date().nullable().optional(),
       })
     )
     .output(formOutputSchema)
     .mutation(async ({ ctx, input }) => {
       const { id, password, ...data } = input;
-      const form = await formService.updateForm(id, ctx.user.userId, data as any, password);
-      if (!form) throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
-      return form;
+      try {
+        const form = await formService.updateForm(id, ctx.user.userId, data as any, password);
+        if (!form) throw new TRPCError({ code: "NOT_FOUND", message: "Form not found" });
+        return form;
+      } catch (err) {
+        if (err instanceof TRPCError) throw err;
+        // Postgres unique constraint violation (e.g. duplicate slug)
+        if ((err as any)?.code === "23505") {
+          throw new TRPCError({ code: "CONFLICT", message: "That slug is already taken by another form" });
+        }
+        throw err;
+      }
     }),
 
   publish: protectedProcedure

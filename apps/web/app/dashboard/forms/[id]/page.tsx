@@ -360,7 +360,7 @@ export default function FormBuilderPage({ params }: { params: Promise<{ id: stri
                   {form.title}
                 </h2>
                 {form.description && (
-                  <p className="text-[#555] text-xs mt-1 font-mono">{form.description}</p>
+                  <p className="text-white/80 text-xs mt-1 font-mono">{form.description}</p>
                 )}
               </div>
               <div className="p-6 space-y-5">
